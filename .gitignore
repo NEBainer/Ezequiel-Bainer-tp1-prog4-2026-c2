@@ -1,0 +1,103 @@
+# =====================================================================
+# .gitignore — TP1 Programación IV (Angular 22 + Supabase)
+# Base: el que genera `ng new` (Angular 22), + exclusiones propias.
+# =====================================================================
+
+# ---------- Salida de compilación y caché de Angular ----------
+/dist
+/tmp
+/out-tsc
+/bazel-out
+/.angular/cache
+/.angular
+
+# ---------- Node / librerías ----------
+/node_modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+*.tsbuildinfo
+# package-lock.json SÍ se versiona (fija las mismas versiones de librerías en cada instalación)
+
+# ---------- Tests / cobertura ----------
+/coverage
+testem.log
+__screenshots__/
+
+# ---------- Variables de entorno y secretos ----------
+# Claves privadas (service_role de Supabase, VAPID privada, secrets de Edge Functions) NUNCA al repo.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.*
+
+# NO ignorar src/environments/environment.ts ni environment.development.ts:
+# Angular las necesita en el build (sin ellas el deploy falla).
+# Ahí solo van claves PÚBLICAS (URL + publishable key de Supabase, VAPID pública).
+
+# ---------- Supabase CLI / Edge Functions (archivos locales) ----------
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+supabase/.env.*
+
+# ---------- Vercel (si se usa la CLI) ----------
+.vercel
+
+# ---------- Configuración local de herramientas de desarrollo ----------
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+.copilot/
+
+# ---------- Documentación ----------
+# Solo se versionan estos dos documentos; el resto de docs/ es material de trabajo local.
+docs/*
+!docs/requerimientos.md
+!docs/decisiones.md
+
+# ---------- Editores / IDEs ----------
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.swp
+*~
+
+# Visual Studio Code (se suben solo estas configuraciones compartibles)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/*
+
+# ---------- Sistema operativo ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Varios ----------
+/connect.lock
+/libpeerconnection.log
+/typings
+.sass-cache/
+*.log
+*.zip
+*.rar
+*.7z
+*.bak
+*.orig
