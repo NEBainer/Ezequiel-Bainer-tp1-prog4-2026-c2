@@ -3,7 +3,7 @@
 Sistema web para un cine: venta de entradas con selección de butacas en tiempo real, candy bar, administración, validación de entradas por QR y programa de fidelización.
 
 - **Alumno:** Nicolas Ezequiel Bainer
-- **Demo (deploy):** [URL de Vercel]
+- **Demo (deploy):** https://ezequiel-bainer-tp1-prog4-2026-c2.vercel.app/
 - **Repositorio:** https://github.com/NEBainer/Ezequiel-Bainer-tp1-prog4-2026-c2
 
 ## Usuarios de prueba
