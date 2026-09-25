@@ -121,16 +121,56 @@ _Se completa con las ambigüedades detectadas en los correos y el criterio elegi
 _A completar._
 
 ### 4.2 Catálogo: películas, géneros, salas, butacas y funciones
-_A completar._
+
+**Distribución de las salas**
+
+Cada sala tiene 19 filas, identificadas con letras de la A a la T sin incluir la letra K.
+
+- Las filas A-I y L-T (18 filas) tienen 28 butacas cada una, en tres columnas de 4, 20 y 4 butacas.
+- La fila J concentra las butacas accesibles para personas con discapacidad, en el mismo sector físico que ocupaban originalmente las filas J y K de la distribución inicial. Tiene 14 butacas, en tres columnas de 2, 10 y 2.
+- Las filas R, S y T conservan la distribución estándar de 28 butacas y son además butacas VIP, con un precio superior y una marca visual diferenciada en el mapa de butacas.
+- En total, cada sala tiene 518 butacas.
+
+El resto de este módulo (géneros, formato, idioma y asignación automática de funciones) se completa a medida que se resuelven los criterios correspondientes.
 
 ### 4.3 Compra: butacas en tiempo real, precios, cupones y pago
-_A completar._
+
+**Restricción de edad**
+
+Las películas con restricción de edad (13 o 18 años) se validan de forma distinta según el tipo de compra:
+
+- En una compra registrada, la validación es automática, contra la fecha de nacimiento cargada en el registro. Si el usuario no cumple la edad mínima de la película, no puede adquirir esa entrada.
+- En una compra anónima no hay fecha de nacimiento disponible, por lo que se solicita una declaración jurada mediante un checkbox específico para la restricción de la película en cuestión (por ejemplo, "Declaro que quien va a ver la película tiene 18 años o más"). La compra no avanza sin esa confirmación.
+- En ambos casos, si la película tiene restricción de edad, la entrada generada incluye una leyenda indicando que debe asistir acompañado de un adulto. La verificación presencial de la edad real queda fuera del alcance del sistema.
+
+**Precio final, cupones, puntos y crédito**
+
+Los descuentos sobre el precio no se acumulan entre sí: se aplica automáticamente el mejor cupón disponible para el usuario. El precio final de una entrada se calcula en este orden:
+
+1. Precio base según la fila (normal o VIP).
+2. Si la función está en preventa, el precio base se reemplaza por el precio de preventa correspondiente.
+3. Se aplica el mejor cupón disponible, obteniendo el precio final de la entrada.
+
+Los puntos del programa de fidelización se calculan sobre el monto final efectivamente pagado, es decir, después de aplicar el cupón y sin contar la parte cubierta con crédito de cuenta o con puntos canjeados en la misma compra.
+
+El crédito de cuenta y los puntos canjeados no son descuentos sino medios de pago: se aplican una vez calculado el precio final, pueden combinarse entre sí y con otros métodos de pago, y pueden cubrir el monto total o solo una parte.
+
+El resto de este módulo (validación del QR combinado y medio de pago) se completa a medida que se resuelven los criterios correspondientes.
 
 ### 4.4 Candy bar y combos
 _A completar._
 
 ### 4.5 Entradas: PDF, QR y validación
-_A completar._
+
+**Validación del QR combinado (entrada y candy bar)**
+
+Una compra puede incluir dos elementos a validar: la entrada y, si corresponde, los productos de candy bar. Ambos se representan con el mismo QR, pero cada elemento se valida de forma independiente:
+
+- El estado de validación de la entrada y el de la parte de candy bar (cuando existe) se registran por separado, y cada uno puede confirmarse en cualquier orden y en cualquier momento.
+- El QR deja de ser válido recién cuando se confirmaron todas las partes que corresponden a esa compra. Si la compra no incluyó candy bar, alcanza con validar la entrada.
+- Al escanear el código o ingresarlo manualmente, la pantalla de validación indica con claridad qué parte de la compra todavía está pendiente, para evitar rechazar por error un QR que aún tiene una parte disponible.
+
+El resto de este módulo (generación del PDF y del código QR) se completa a medida que se resuelven los criterios correspondientes.
 
 ### 4.6 Reseñas y "Mis películas"
 _A completar._
