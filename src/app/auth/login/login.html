@@ -1,0 +1,31 @@
+<form [formGroup]="formulario" (ngSubmit)="accion()">
+  <h2>Ingresar</h2>
+
+  <div class="campo">
+    <label for="email">Email</label>
+    <input type="email" id="email" formControlName="email" autocomplete="email" />
+    @if (email?.touched) {
+      @if (email?.errors?.['required']) {
+        <small>El email es requerido</small>
+      }
+      @if (email?.errors?.['email']) {
+        <small>El email no es válido</small>
+      }
+    }
+  </div>
+
+  <div class="campo">
+    <label for="password">Contraseña</label>
+    <input type="password" id="password" formControlName="password" autocomplete="current-password" />
+    @if (password?.touched && password?.errors?.['required']) {
+      <small>La contraseña es requerida</small>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <button type="submit">Ingresar</button>
+  <p>¿No tenés cuenta? <a routerLink="/auth/registro">Registrate</a></p>
+</form>
