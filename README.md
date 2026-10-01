@@ -1,4 +1,4 @@
-# [Nombre del cine] — TP1 Programación IV (2026 C2)
+# Fotograma — TP1 Programación IV (2026 C2)
 
 Sistema web para un cine: venta de entradas con selección de butacas en tiempo real, candy bar, administración, validación de entradas por QR y programa de fidelización.
 
