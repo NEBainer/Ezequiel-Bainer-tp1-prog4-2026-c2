@@ -345,3 +345,12 @@ create policy "imagenes: admin modifica" on storage.objects for update to authen
   using (bucket_id = 'imagenes' and (auth.jwt() -> 'app_metadata' ->> 'rol') = 'admin');
 create policy "imagenes: admin borra" on storage.objects for delete to authenticated
   using (bucket_id = 'imagenes' and (auth.jwt() -> 'app_metadata' ->> 'rol') = 'admin');
+
+-- Ajuste: un usuario logueado también puede elegir comprar como anónimo (usuario_id null)
+drop policy "compras: anonimo crea" on public.compras;
+create policy "compras: anonimo crea" on public.compras for insert to anon, authenticated
+  with check (usuario_id is null);
+
+drop policy "compra_items: anonimo crea" on public.compra_items;
+create policy "compra_items: anonimo crea" on public.compra_items for insert to anon, authenticated
+  with check (exists (select 1 from public.compras c where c.id = compra_id and c.usuario_id is null));
