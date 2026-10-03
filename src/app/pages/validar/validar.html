@@ -1,0 +1,110 @@
+<div class="contenedor">
+  <h1>Validar QR</h1>
+
+  <div class="disposicion">
+    <section class="panel entrada-codigo">
+      <form (ngSubmit)="buscar()">
+        <div class="campo">
+          <label for="codigo">Código de la entrada</label>
+          <input
+            id="codigo"
+            [formControl]="codigo"
+            placeholder="Ej: K7MX2Q9A"
+            maxlength="8"
+            autocomplete="off"
+            class="codigo"
+          />
+          @if (codigo.touched && codigo.invalid) {
+            <small>El código tiene 8 letras o números</small>
+          }
+        </div>
+        <div class="acciones">
+          <button type="submit" class="btn-primario" [disabled]="buscando()">Buscar</button>
+          @if (escaneando()) {
+            <button type="button" (click)="detenerEscaneo()">Cerrar cámara</button>
+          } @else {
+            <button type="button" (click)="escanear()">📷 Escanear QR</button>
+          }
+        </div>
+      </form>
+
+      @if (escaneando()) {
+        <div id="lector" class="lector"></div>
+      }
+    </section>
+
+    <section class="resultado">
+      @if (mensaje(); as m) {
+        <p class="mensaje" [class.ok]="m.tipo === 'ok'" [class.error]="m.tipo === 'error'" role="status">
+          {{ m.tipo === 'ok' ? '✔' : '✖' }} {{ m.texto }}
+        </p>
+      }
+
+      @if (compra(); as c) {
+        <article class="panel">
+          <div class="cabecera">
+            <div>
+              <h2>{{ c.peliculas?.nombre }}</h2>
+              <p class="suave">
+                {{ c.funciones?.inicio | date: "EEEE d/M · HH:mm" }} h · {{ c.funciones?.salas?.nombre }} ·
+                {{ c.cantidad_entradas }} persona(s)
+              </p>
+            </div>
+            <code>{{ c.codigo }}</code>
+          </div>
+
+          @if (c.estado === 'cancelada') {
+            <p class="aviso peligro">Compra cancelada: el QR no es válido.</p>
+          } @else if (!esDeHoy(c)) {
+            <p class="aviso">Ojo: esta entrada no es para hoy.</p>
+          }
+          @if (c.requiere_adulto) {
+            <p class="aviso peligro">Película +{{ c.peliculas?.edad_minima }}: los menores deben ingresar con un adulto.</p>
+          }
+
+          <p class="butacas">
+            @for (e of c.entradas; track e.id) {
+              <span class="etiqueta" [class.vip]="e.tipo === 'vip'">{{ e.fila }}{{ e.numero }}{{ e.tipo === 'vip' ? ' VIP' : '' }}</span>
+            }
+          </p>
+
+          <!-- Las dos partes del QR se validan por separado -->
+          <div class="partes">
+            <div class="parte" [class.usada]="c.entrada_validada">
+              <h3>🎬 Entrada</h3>
+              @if (c.entrada_validada) {
+                <p>Ya usada</p>
+              } @else {
+                <button class="btn-primario" (click)="validarEntrada()" [disabled]="c.estado === 'cancelada'">
+                  Validar ingreso
+                </button>
+              }
+            </div>
+
+            <div class="parte" [class.usada]="c.candy_validado">
+              <h3>🍿 Candy</h3>
+              @if (c.candy_validado === null) {
+                <p class="suave">No compró candy</p>
+              } @else {
+                <ul>
+                  @for (i of c.compra_items; track i.id) {
+                    <li>{{ i.cantidad }} × {{ i.nombre }}</li>
+                  }
+                </ul>
+                @if (c.candy_validado) {
+                  <p>Ya entregado</p>
+                } @else {
+                  <button class="btn-primario" (click)="validarCandy()" [disabled]="c.estado === 'cancelada'">
+                    Entregar candy
+                  </button>
+                }
+              }
+            </div>
+          </div>
+
+          <button class="limpiar btn-chico" (click)="limpiar()">Siguiente cliente</button>
+        </article>
+      }
+    </section>
+  </div>
+</div>

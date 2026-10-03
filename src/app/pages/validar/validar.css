@@ -1,0 +1,90 @@
+.disposicion {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.codigo {
+  font-family: ui-monospace, monospace;
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.lector {
+  margin-top: 1rem;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+}
+
+.mensaje {
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radio-chico);
+}
+
+.mensaje.ok {
+  background: rgb(108 197 138 / 15%);
+  border: 1px solid var(--exito);
+}
+
+.mensaje.error {
+  background: rgb(229 103 90 / 15%);
+  border: 1px solid var(--peligro);
+  color: var(--texto);
+}
+
+.cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+code {
+  font-size: 1.2rem;
+  letter-spacing: 0.15em;
+}
+
+.butacas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.partes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.parte {
+  padding: 1rem;
+  border-radius: var(--radio-chico);
+  border: 2px solid var(--acento);
+}
+
+.parte.usada {
+  border-color: var(--borde);
+  opacity: 0.6;
+}
+
+.parte ul {
+  margin: 0 0 0.6rem;
+  padding-left: 1.1rem;
+}
+
+@media (max-width: 760px) {
+  .disposicion,
+  .partes {
+    grid-template-columns: 1fr;
+  }
+}
