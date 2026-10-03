@@ -1,0 +1,43 @@
+<div class="leyenda">
+  <span><i class="butaca"></i> Libre</span>
+  <span><i class="butaca seleccionada"></i> Tu elección</span>
+  <span><i class="butaca ocupada"></i> Ocupada</span>
+  <span><i class="butaca accesible"></i> Accesible</span>
+  <span><i class="butaca vip"></i> VIP</span>
+</div>
+
+<div class="sala">
+  <div class="pantalla">Pantalla</div>
+
+  <div class="filas">
+    @for (f of filas; track f.fila) {
+      <div class="fila" [class.fila-vip]="f.fila === 'R'" [class.fila-accesible]="f.fila === 'J'">
+        <span class="letra">{{ f.fila }}</span>
+        @for (bloque of f.bloques; track $index) {
+          <div class="bloque" [class.centro]="$index === 1">
+            @for (b of bloque; track b.numero) {
+              <button
+                type="button"
+                class="butaca"
+                [class.accesible]="b.tipo === 'accesible'"
+                [class.vip]="b.tipo === 'vip'"
+                [class.ocupada]="estaOcupada(b)"
+                [class.seleccionada]="estaSeleccionada(b)"
+                [disabled]="estaOcupada(b)"
+                [attr.aria-label]="descripcion(b)"
+                [attr.aria-pressed]="estaSeleccionada(b)"
+                [title]="descripcion(b)"
+                (click)="alternar.emit(b)"
+              >
+                @if (b.tipo === 'accesible' && !estaOcupada(b)) {
+                  ♿
+                }
+              </button>
+            }
+          </div>
+        }
+        <span class="letra">{{ f.fila }}</span>
+      </div>
+    }
+  </div>
+</div>
