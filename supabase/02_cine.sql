@@ -354,3 +354,11 @@ create policy "compras: anonimo crea" on public.compras for insert to anon, auth
 drop policy "compra_items: anonimo crea" on public.compra_items;
 create policy "compra_items: anonimo crea" on public.compra_items for insert to anon, authenticated
   with check (exists (select 1 from public.compras c where c.id = compra_id and c.usuario_id is null));
+
+-- Ajuste: la política de insert de compra_items no puede consultar "compras", porque la subconsulta
+-- se evalúa con los permisos de quien inserta y el anónimo no puede leer compras (y no debe: verían
+-- los códigos de QR). El compra_id es un UUID aleatorio que solo conoce quien hizo la compra.
+drop policy "compra_items: anonimo crea" on public.compra_items;
+drop policy "compra_items: registrado crea" on public.compra_items;
+create policy "compra_items: todos crean" on public.compra_items for insert to anon, authenticated
+  with check (true);

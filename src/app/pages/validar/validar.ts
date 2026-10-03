@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Html5Qrcode } from 'html5-qrcode';
 import { ComprasService } from '../../services/compras.service';
 import { LogService } from '../../services/log.service';
@@ -18,6 +18,8 @@ export class Validar implements OnDestroy {
   private logS = inject(LogService);
 
   codigo = new FormControl('', [Validators.required, Validators.pattern(/^[A-Za-z0-9]{8}$/)]);
+  // Con [formGroup] Angular intercepta el submit (si no, el navegador recarga la página)
+  formulario = new FormGroup({ codigo: this.codigo });
   compra = signal<Compra | null>(null);
   mensaje = signal<{ texto: string; tipo: 'ok' | 'error' } | null>(null);
   buscando = signal(false);
@@ -25,13 +27,16 @@ export class Validar implements OnDestroy {
 
   private lector?: Html5Qrcode;
 
-  async buscar(codigo = this.codigo.value ?? '') {
+  // conservarMensaje: después de validar se vuelve a buscar la compra sin borrar el "✔ validada"
+  async buscar(codigo = this.codigo.value ?? '', conservarMensaje = false) {
     if (!/^[A-Za-z0-9]{8}$/.test(codigo.trim())) {
       this.codigo.markAsTouched();
       return;
     }
     this.buscando.set(true);
-    this.mensaje.set(null);
+    if (!conservarMensaje) {
+      this.mensaje.set(null);
+    }
     const compra = await this.comprasS.buscarPorCodigo(codigo);
     this.buscando.set(false);
     this.compra.set(compra);
@@ -56,7 +61,7 @@ export class Validar implements OnDestroy {
     } else {
       this.mensaje.set({ texto: 'Esta entrada ya fue usada (o la compra está cancelada).', tipo: 'error' });
     }
-    await this.buscar(compra.codigo);
+    await this.buscar(compra.codigo, true);
   }
 
   async validarCandy() {
@@ -71,7 +76,7 @@ export class Validar implements OnDestroy {
     } else {
       this.mensaje.set({ texto: 'El candy de esta compra ya fue retirado.', tipo: 'error' });
     }
-    await this.buscar(compra.codigo);
+    await this.buscar(compra.codigo, true);
   }
 
   // ---------- Lector de QR con la cámara (librería html5-qrcode) ----------

@@ -3,7 +3,7 @@
 
   <div class="disposicion">
     <section class="panel entrada-codigo">
-      <form (ngSubmit)="buscar()">
+      <form [formGroup]="formulario" (ngSubmit)="buscar()">
         <div class="campo">
           <label for="codigo">Código de la entrada</label>
           <input

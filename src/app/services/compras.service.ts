@@ -80,7 +80,10 @@ export class ComprasService {
     }
 
     if (items.length > 0) {
-      await this.supS.Sup.from('compra_items').insert(items);
+      const { error } = await this.supS.Sup.from('compra_items').insert(items);
+      if (error) {
+        return { error: 'La entrada se compró, pero no se pudo registrar el candy. Acercate a la boletería.' };
+      }
     }
     if (canjes.length > 0) {
       await this.supS.Sup.from('canjes').insert(canjes);
