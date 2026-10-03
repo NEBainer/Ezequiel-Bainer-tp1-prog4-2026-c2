@@ -115,10 +115,14 @@ Documento que resume los requerimientos del sistema, extraídos del intercambio 
 
 ## 4. Interpretación y criterios adoptados
 
-_Se completa con las ambigüedades detectadas en los correos y el criterio elegido para cada una, por módulo._
+Ambigüedades detectadas en los correos y criterio adoptado para cada una, por módulo.
 
 ### 4.1 Usuarios, roles y autenticación
-_A completar._
+- Hay tres roles: **cliente** (cualquier usuario registrado), **empleado** y **admin**.
+- El rol se guarda en `app_metadata` de Supabase Auth. Ese dato solo puede modificarlo un administrador desde el panel de Supabase (no el propio usuario) y viaja en el JWT, por lo que las políticas RLS pueden consultarlo. Un usuario sin rol asignado es cliente.
+- Las cuentas de admin y empleados se crean desde el registro y luego se les asigna el rol desde Supabase.
+- El registro pide todos los datos solicitados: correo, nombre, apellido, fecha de nacimiento, tipo de sangre (lista cerrada), color de ojos (lista cerrada) y días de vacaciones por año (entero entre 0 y 365).
+- La fecha de nacimiento se ingresa con tres listas (día, mes, año) en lugar de un calendario desplegable (R-28).
 
 ### 4.2 Catálogo: películas, géneros, salas, butacas y funciones
 
@@ -131,58 +135,87 @@ Cada sala tiene 19 filas, identificadas con letras de la A a la T sin incluir la
 - Las filas R, S y T conservan la distribución estándar de 28 butacas y son además butacas VIP, con un precio superior y una marca visual diferenciada en el mapa de butacas.
 - En total, cada sala tiene 518 butacas.
 
-El resto de este módulo (géneros, formato, idioma y asignación automática de funciones) se completa a medida que se resuelven los criterios correspondientes.
+**Películas**
+- Cada película tiene nombre, sinopsis, duración, póster (opcional), edad mínima (sin restricción, 13 o 18), fecha de estreno, precio de preventa (opcional) y uno o más géneros.
+- El admin decide si la película se muestra en la página. Una película con ventas no se borra: se oculta.
+- El formato (2D, 3D, 4D, 5D) y el idioma (castellano o subtitulada) son datos de cada **función**, no de la película: una misma película puede proyectarse en 3D subtitulada a una hora y en 2D castellano a otra.
+
+**Funciones y asignación automática de sala (R-06, R-22)**
+- El admin elige película, formato, idioma, días de la semana, uno o más horarios, desde qué día y durante cuántas semanas (por ejemplo: lunes, martes y viernes a las 18:00 durante 2 semanas).
+- El sistema asigna a cada función la primera sala libre. Una sala está libre si ninguna función (existente o creada en la misma tanda) se superpone considerando la duración de la película más 30 minutos de limpieza.
+- Si en algún horario no hay ninguna sala libre, esa función no se crea y se informa al admin.
+- No se crean funciones en el pasado ni antes de la fecha de estreno.
 
 ### 4.3 Compra: butacas en tiempo real, precios, cupones y pago
 
+**Registrado o anónimo:** antes de elegir butacas, el usuario elige comprar con su cuenta o como anónimo. Un usuario logueado también puede comprar como anónimo.
+
 **Restricción de edad**
 
-Las películas con restricción de edad (13 o 18 años) se validan de forma distinta según el tipo de compra:
-
 - En una compra registrada, la validación es automática, contra la fecha de nacimiento cargada en el registro. Si el usuario no cumple la edad mínima de la película, no puede adquirir esa entrada.
-- En una compra anónima no hay fecha de nacimiento disponible, por lo que se solicita una declaración jurada mediante un checkbox específico para la restricción de la película en cuestión (por ejemplo, "Declaro que quien va a ver la película tiene 18 años o más"). La compra no avanza sin esa confirmación.
-- En ambos casos, si la película tiene restricción de edad, la entrada generada incluye una leyenda indicando que debe asistir acompañado de un adulto. La verificación presencial de la edad real queda fuera del alcance del sistema.
+- En una compra anónima no hay fecha de nacimiento disponible, por lo que se solicita una declaración jurada mediante un checkbox específico para la restricción de la película. La compra no avanza sin esa confirmación.
+- En ambos casos, si la película tiene restricción de edad, la entrada incluye una leyenda indicando que debe asistir acompañado de un adulto. La verificación presencial de la edad queda fuera del alcance del sistema.
+
+**Butacas en tiempo real**
+- El mapa distingue butacas libres, ocupadas, elegidas, accesibles y VIP con colores y símbolos distintos.
+- Cuando otra persona compra o cancela, el mapa se actualiza sin recargar. Si alguien compra una butaca que el usuario tenía elegida, se le quita de la selección y se le avisa.
+- La base de datos impide que dos compras se queden con la misma butaca de la misma función.
+- Máximo 10 butacas por compra.
 
 **Precio final, cupones, puntos y crédito**
 
-Los descuentos sobre el precio no se acumulan entre sí: se aplica automáticamente el mejor cupón disponible para el usuario. El precio final de una entrada se calcula en este orden:
+1. Precio de cada entrada: el normal o, si la película está en preventa, el de preventa. Las butacas VIP suman la diferencia entre el precio VIP y el normal.
+2. Un combo reemplaza el precio de una entrada por el precio fijo del combo.
+3. Las entradas y productos canjeados con puntos no se cobran (en una butaca VIP canjeada se paga solo el recargo VIP).
+4. Sobre el subtotal se aplica automáticamente el **mejor** cupón disponible; los cupones no se acumulan. Los compradores anónimos no tienen cupones.
+5. Sobre el total, el crédito de la cuenta funciona como medio de pago (total o parcial). El resto se paga con tarjeta.
+6. Se gana 1 punto por cada peso pagado con tarjeta (no por lo pagado con crédito ni por lo canjeado).
 
-1. Precio base según la fila (normal o VIP).
-2. Si la función está en preventa, el precio base se reemplaza por el precio de preventa correspondiente.
-3. Se aplica el mejor cupón disponible, obteniendo el precio final de la entrada.
+Antes de pagar se muestra el detalle completo, con las butacas VIP identificadas y un aviso explícito de que se está comprando VIP.
 
-Los puntos del programa de fidelización se calculan sobre el monto final efectivamente pagado, es decir, después de aplicar el cupón y sin contar la parte cubierta con crédito de cuenta o con puntos canjeados en la misma compra.
-
-El crédito de cuenta y los puntos canjeados no son descuentos sino medios de pago: se aplican una vez calculado el precio final, pueden combinarse entre sí y con otros métodos de pago, y pueden cubrir el monto total o solo una parte.
-
-El resto de este módulo (validación del QR combinado y medio de pago) se completa a medida que se resuelven los criterios correspondientes.
+**Pago:** el pago con tarjeta es simulado (se validan los datos del formulario, pero no se realiza ningún cobro).
 
 ### 4.4 Candy bar y combos
-_A completar._
+- El admin crea categorías y productos (precio, categoría, costo en puntos opcional, disponible o no).
+- Los combos tienen nombre, descripción de lo que incluyen y precio fijo. Cada combo incluye una entrada, por lo que no se pueden agregar más combos que butacas elegidas. Se muestran destacados al inicio del paso de candy.
+- El candy se compra junto con la entrada y se retira con el mismo QR.
 
 ### 4.5 Entradas: PDF, QR y validación
 
 **Validación del QR combinado (entrada y candy bar)**
 
-Una compra puede incluir dos elementos a validar: la entrada y, si corresponde, los productos de candy bar. Ambos se representan con el mismo QR, pero cada elemento se valida de forma independiente:
+- El estado de validación de la entrada y el de la parte de candy bar (cuando existe) se registran por separado, y cada uno puede confirmarse en cualquier orden.
+- El QR deja de ser válido recién cuando se confirmaron todas las partes de esa compra. Si la compra no incluyó candy bar, alcanza con validar la entrada.
+- Al escanear el código o ingresarlo manualmente, la pantalla de validación indica qué parte de la compra todavía está pendiente.
 
-- El estado de validación de la entrada y el de la parte de candy bar (cuando existe) se registran por separado, y cada uno puede confirmarse en cualquier orden y en cualquier momento.
-- El QR deja de ser válido recién cuando se confirmaron todas las partes que corresponden a esa compra. Si la compra no incluyó candy bar, alcanza con validar la entrada.
-- Al escanear el código o ingresarlo manualmente, la pantalla de validación indica con claridad qué parte de la compra todavía está pendiente, para evitar rechazar por error un QR que aún tiene una parte disponible.
-
-El resto de este módulo (generación del PDF y del código QR) se completa a medida que se resuelven los criterios correspondientes.
+**Generación**
+- El QR contiene un código de 8 caracteres (sin caracteres que se confundan, como O/0 o I/1), que también puede dictarse e ingresarse a mano.
+- La entrada se descarga en PDF con los datos de la función, butacas, candy, total, QR y, si corresponde, la leyenda de restricción de edad.
+- El comprador anónimo ve su entrada al terminar la compra y debe descargarla: no queda asociada a ninguna cuenta.
 
 ### 4.6 Reseñas y "Mis películas"
-_A completar._
+- Solo los usuarios registrados pueden reseñar: de 1 a 5 estrellas y un comentario de hasta 280 caracteres. Una reseña por usuario y película (se puede editar o borrar).
+- Las reseñas y el promedio se ven en la ficha de la película, antes de comprar, y el promedio también en la cartelera.
+- "Mis películas" muestra las películas de funciones ya pasadas de compras no canceladas, con póster, fecha y la calificación que el usuario le dio.
 
 ### 4.7 Fidelización: puntos y crédito
-_A completar._
+- Los puntos y el crédito no se guardan como un saldo modificable: se calculan a partir del historial de compras y canjes del propio usuario. Por eso no pueden transferirse.
+- **Cancelación:** hasta 2 horas antes de la función y si la entrada no fue usada. No se devuelve dinero: se acredita en la cuenta todo lo pagado (tarjeta y crédito usado). Las butacas se liberan, los puntos ganados en esa compra se anulan y los canjeados se devuelven.
+- El perfil muestra puntos, crédito, historial de canjes, entradas próximas y compras anteriores.
 
 ### 4.8 Próximamente, preventa y notificaciones
-_A completar._
+- "Próximamente" muestra las películas visibles cuya fecha de estreno es futura.
+- Un usuario registrado puede activar una alerta por película. Al activarla, el navegador pide permiso de notificaciones y se guarda la suscripción push.
+- Cuando las entradas están a la venta, el admin envía el aviso desde el panel; la notificación llega aunque la aplicación esté cerrada y al tocarla abre la película.
+- **Preventa:** si la película tiene precio de preventa, la venta abre 7 días antes del estreno a ese precio. Desde el día del estreno rige el precio normal. Sin precio de preventa, la venta abre el día del estreno.
 
 ### 4.9 Administración: reportes, gráficos y registro de actividad
-_A completar._
+- Reporte de facturación por día y entradas vendidas, para los últimos 7, 30 o 90 días, exportable a PDF y a Excel (archivo CSV).
+- Gráfico de películas más vistas (entradas vendidas) de la última semana o del último mes, y ranking de productos de candy más vendidos.
+- Registro de actividad con fecha, hora y usuario: creación de funciones y películas, cambios de precios, cupones y productos, validación de entradas, entrega de candy y avisos enviados.
 
 ### 4.10 Experiencia de usuario y estilo visual
-_A completar._
+- Identidad propia "Fotograma": paleta oscura de sala con acento ámbar, tipografías Bricolage Grotesque y DM Sans, logo propio.
+- Fechas y horas se eligen con botones o listas, sin calendarios desplegables.
+- El mapa de butacas y el resumen de la compra se ven a la vez, para evitar scroll.
+- **Mapa del cine (R-17):** no se implementa, porque el cliente indicó que no tiene aprobación.

@@ -108,7 +108,7 @@ export class CalculadoraPrecio {
     for (const c of pedido.combos) {
       if (c.cantidad > 0) {
         // Se suma el precio del combo y se descuenta la entrada que incluye
-        lineas.push(linea(`${c.item.nombre} (incluye la entrada)`, c.cantidad, c.item.precio - base));
+        lineas.push(linea(`${c.item.nombre} (en lugar de 1 entrada)`, c.cantidad, c.item.precio - base));
       }
     }
     for (const p of pedido.productos) {
