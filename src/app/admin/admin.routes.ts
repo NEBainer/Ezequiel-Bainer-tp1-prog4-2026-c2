@@ -20,6 +20,10 @@ const adminRoutes: Routes = [
         loadComponent: () => import('./funciones/funciones').then((m) => m.AdminFunciones),
       },
       {
+        path: 'salas',
+        loadComponent: () => import('./salas/salas').then((m) => m.AdminSalas),
+      },
+      {
         path: 'candy',
         loadComponent: () => import('./candy/candy').then((m) => m.AdminCandy),
       },

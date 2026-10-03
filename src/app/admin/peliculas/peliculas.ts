@@ -107,9 +107,16 @@ export class AdminPeliculas implements OnInit {
       this.mensaje.set('Revisá los campos marcados.');
       return;
     }
+    const valores = this.formulario.value;
+
+    // "Toda película tiene una imagen": al crear, el póster es obligatorio (al editar se conserva el anterior)
+    if (!this.editando() && !valores.imagen) {
+      this.mensaje.set('Elegí el póster de la película.');
+      return;
+    }
+
     this.guardando.set(true);
     this.mensaje.set(null);
-    const valores = this.formulario.value;
 
     // 1) Si eligió un póster nuevo, se sube primero y se guarda solo su ruta
     let imagen = this.editando()?.imagen ?? null;

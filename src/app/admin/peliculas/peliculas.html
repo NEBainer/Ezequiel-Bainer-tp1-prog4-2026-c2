@@ -69,7 +69,7 @@
         <span class="suave ayuda">Si tiene precio, la venta abre 7 días antes del estreno a ese valor.</span>
       </div>
       <div class="campo">
-        <label for="imagen">Póster</label>
+        <label for="imagen">Póster {{ editando() ? '(dejalo vacío para conservar el actual)' : '' }}</label>
         <input id="imagen" type="file" accept="image/png, image/jpeg, image/webp" (input)="elegirImagen($event)" />
         <span class="suave ayuda">PNG, JPG o WEBP de hasta 2 MB.</span>
       </div>

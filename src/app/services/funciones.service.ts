@@ -22,6 +22,34 @@ export class FuncionesService {
     return (data ?? []) as Sala[];
   }
 
+  async crearSala(nombre: string) {
+    const { error } = await this.supS.Sup.from('salas').insert({ nombre });
+    return { error };
+  }
+
+  async renombrarSala(id: number, nombre: string) {
+    const { error } = await this.supS.Sup.from('salas').update({ nombre }).eq('id', id);
+    return { error };
+  }
+
+  // Falla si la sala tiene funciones (FK de funciones.sala_id)
+  async borrarSala(id: number) {
+    const { error } = await this.supS.Sup.from('salas').delete().eq('id', id);
+    return { error };
+  }
+
+  // Cantidad de funciones futuras por sala (para mostrar en el admin)
+  async funcionesFuturasPorSala() {
+    const { data } = await this.supS.Sup.from('funciones')
+      .select('sala_id')
+      .gt('inicio', new Date().toISOString());
+    const cantidades = new Map<number, number>();
+    for (const f of (data ?? []) as { sala_id: number }[]) {
+      cantidades.set(f.sala_id, (cantidades.get(f.sala_id) ?? 0) + 1);
+    }
+    return cantidades;
+  }
+
   // Funciones que todavía no empezaron, de una película
   async traerProximasDePelicula(peliculaId: number) {
     const { data } = await this.supS.Sup.from('funciones')

@@ -21,7 +21,7 @@ También se puede comprar sin cuenta (compra anónima).
 - **Compra:** elección registrado / anónimo → mapa de butacas en tiempo real (común, accesible, VIP) → candy y combos destacados, canje de puntos → pago simulado con crédito de cuenta → entrada con QR y PDF.
 - **Perfil:** puntos, crédito, historial de canjes, entradas próximas con cancelación (hasta 2 h antes, devuelve crédito) y compras anteriores. **Mis películas:** historial visual con la calificación propia.
 - **Empleados:** validación de entradas y candy por cámara o código manual; cada parte del QR se usa una sola vez.
-- **Admin:** películas (póster en Storage, géneros, edad, preventa, visibilidad, aviso push), funciones con asignación automática de sala, candy, combos, precios y cupones, reportes de facturación (PDF y Excel) con gráficos, y registro de actividad.
+- **Admin:** películas (póster en Storage, géneros, edad, preventa, visibilidad, aviso push), funciones con asignación automática de sala, salas, candy, combos, precios y cupones, reportes de facturación (PDF y Excel) con gráficos, y registro de actividad.
 
 ## Stack
 - Angular 22 (componentes standalone, signals, `computed`, lazy loading, guards funcionales, formularios reactivos, pipes y directivas propias)
@@ -40,7 +40,7 @@ También se puede comprar sin cuenta (compra anónima).
 src/app/
   admin/            Panel de administración (rutas hijas con layout propio, carga diferida)
     layout/         Menú lateral + router-outlet
-    peliculas/  funciones/  candy/  precios/  reportes/  log/
+    peliculas/  funciones/  salas/  candy/  precios/  reportes/  log/
   auth/             Login y registro (auth.routes.ts)
   pages/            home, pelicula, compra, perfil, mis-peliculas, validar
   components/       Reutilizables: mapa-butacas, poster, estrellas, selector-fecha,
