@@ -1,0 +1,129 @@
+<div class="contenedor">
+  @if (cargando()) {
+    <p class="suave">Cargando…</p>
+  } @else if (!pelicula()) {
+    <p class="vacio">No encontramos esa película. <a routerLink="/">Volver a la cartelera</a></p>
+  } @else {
+    @let p = pelicula()!;
+    <section class="ficha">
+      <app-poster [nombre]="p.nombre" [imagen]="p.imagen" />
+
+      <div>
+        <h1>{{ p.nombre }}</h1>
+        <p class="datos">
+          <span>{{ p.duracion | duracion }}</span>
+          @if (p.edad_minima) {
+            <span class="etiqueta edad">+{{ p.edad_minima }}</span>
+          } @else {
+            <span class="etiqueta">ATP</span>
+          }
+          @for (g of p.generos; track g.id) {
+            <span class="etiqueta">{{ g.nombre }}</span>
+          }
+        </p>
+        <p class="promedio">
+          @if (promedio() !== null) {
+            <app-estrellas [valor]="promedio()!" />
+            <strong>{{ promedio()!.toFixed(1) }}</strong>
+            <span class="suave">({{ resenas().length }} {{ resenas().length === 1 ? 'reseña' : 'reseñas' }})</span>
+          } @else {
+            <span class="suave">Todavía no tiene reseñas.</span>
+          }
+        </p>
+        <p class="sinopsis">{{ p.sinopsis }}</p>
+
+        @if (p.edad_minima) {
+          <p class="aviso peligro">
+            Apta para mayores de {{ p.edad_minima }} años. Los menores deben asistir acompañados de un adulto.
+          </p>
+        }
+      </div>
+    </section>
+
+    <!-- Funciones -->
+    <section class="panel">
+      <h2>Funciones</h2>
+      @if (!aLaVenta()) {
+        <p class="suave">
+          Se estrena el {{ p.fecha_estreno + 'T12:00' | date: "EEEE d 'de' MMMM" }}. Las entradas todavía no están a la venta.
+        </p>
+      } @else if (dias().length === 0) {
+        <p class="suave">No hay funciones programadas por ahora.</p>
+      } @else {
+        @if (enPreventa()) {
+          <p class="aviso">
+            <strong>Preventa:</strong> entradas a {{ p.precio_preventa | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
+            hasta el estreno ({{ p.fecha_estreno + 'T12:00' | date: 'd/M' }}).
+          </p>
+        }
+        <div class="chips dias" role="group" aria-label="Elegí el día">
+          @for (dia of dias(); track dia) {
+            <button
+              type="button"
+              class="chip"
+              [class.activo]="dia === diaElegido()"
+              (click)="diaElegido.set(dia)"
+            >
+              {{ fechaDeDia(dia) | date: 'EEE d/M' }}
+            </button>
+          }
+        </div>
+
+        <div class="horarios">
+          @for (f of funcionesDelDia(); track f.id) {
+            <a class="horario" [routerLink]="['/comprar', f.id]">
+              <strong>{{ f.inicio | date: 'HH:mm' }}</strong>
+              <span>{{ f.formato }} · {{ f.idioma }}</span>
+              <span class="suave">{{ f.salas?.nombre }}</span>
+            </a>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Reseñas -->
+    <section class="resenas">
+      <h2>Reseñas</h2>
+
+      @if (authS.usuarioActual()) {
+        <form [formGroup]="formResena" (ngSubmit)="guardarResena()" class="panel">
+          <h3>{{ miResena() ? 'Tu reseña' : 'Dejá tu reseña' }}</h3>
+          <app-estrellas
+            [valor]="formResena.value.estrellas ?? 0"
+            [editable]="true"
+            (cambio)="formResena.patchValue({ estrellas: $event })"
+          />
+          <div class="campo">
+            <label for="comentario">Comentario corto</label>
+            <textarea id="comentario" rows="2" maxlength="280" formControlName="comentario"></textarea>
+            @if (comentario?.touched && comentario?.errors?.['required']) {
+              <small>Escribí un comentario</small>
+            }
+          </div>
+          @if (mensajeResena()) {
+            <p class="suave">{{ mensajeResena() }}</p>
+          }
+          <div class="acciones">
+            <button type="submit" class="btn-primario">{{ miResena() ? 'Actualizar' : 'Publicar' }}</button>
+            @if (miResena()) {
+              <button type="button" class="btn-peligro" (click)="borrarResena()">Borrar</button>
+            }
+          </div>
+        </form>
+      } @else {
+        <p class="suave"><a routerLink="/auth/login">Ingresá</a> para dejar tu reseña.</p>
+      }
+
+      @for (r of resenas(); track r.id) {
+        <article class="resena">
+          <div class="cabecera">
+            <strong>{{ r.autor }}</strong>
+            <app-estrellas [valor]="r.estrellas" />
+            <span class="suave">{{ r.created_at | date: 'd/M/yy' }}</span>
+          </div>
+          <p>{{ r.comentario }}</p>
+        </article>
+      }
+    </section>
+  }
+</div>

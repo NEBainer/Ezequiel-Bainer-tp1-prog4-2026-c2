@@ -1,2 +1,108 @@
-<h1>Cartelera</h1>
-<p>Próximamente: películas y funciones.</p>
+<div class="contenedor">
+  @if (cargando()) {
+    <p class="suave">Cargando cartelera…</p>
+  } @else {
+    <!-- Las 3 más vendidas -->
+    <section class="destacadas" aria-labelledby="titulo-destacadas">
+      <p class="sobretitulo">Las más elegidas</p>
+      <h1 id="titulo-destacadas">Lo que todos están viendo</h1>
+
+      <div class="podio">
+        @for (p of masVendidas(); track p.id; let i = $index) {
+          <a class="destacada" [routerLink]="['/pelicula', p.id]">
+            <span class="puesto">{{ i + 1 }}</span>
+            <app-poster [nombre]="p.nombre" [imagen]="p.imagen" />
+            <div class="info">
+              <h2>{{ p.nombre }}</h2>
+              <p class="suave">{{ p.duracion | duracion }} · {{ p.sinopsis | textoLargo: 80 }}</p>
+              <span class="btn btn-primario btn-chico">Comprar entradas</span>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+
+    <!-- Cartelera con buscador -->
+    <section aria-labelledby="titulo-cartelera">
+      <div class="encabezado">
+        <h2 id="titulo-cartelera">Cartelera</h2>
+        <input
+          type="search"
+          class="buscador"
+          placeholder="Buscar película…"
+          aria-label="Buscar película por nombre"
+          [value]="texto()"
+          (input)="buscar($event)"
+        />
+      </div>
+
+      <div class="chips filtros" role="group" aria-label="Filtrar por género">
+        @for (g of generos(); track g.id) {
+          <button
+            type="button"
+            class="chip"
+            [class.activo]="generosElegidos().includes(g.id)"
+            [attr.aria-pressed]="generosElegidos().includes(g.id)"
+            (click)="alternarGenero(g.id)"
+          >
+            {{ g.nombre }}
+          </button>
+        }
+        @if (texto() || generosElegidos().length) {
+          <button type="button" class="chip" (click)="limpiarFiltros()">✕ Limpiar</button>
+        }
+      </div>
+
+      @if (filtradas().length) {
+        <div class="grilla">
+          @for (p of filtradas(); track p.id) {
+            <app-tarjeta-pelicula [pelicula]="p" [promedio]="promedioDe(p.id)" />
+          }
+        </div>
+      } @else {
+        <p class="vacio">No hay películas que coincidan con la búsqueda.</p>
+      }
+    </section>
+
+    <!-- Próximamente -->
+    @if (proximamente().length) {
+      <section class="proximamente" aria-labelledby="titulo-proximamente">
+        <h2 id="titulo-proximamente">Próximamente</h2>
+        <p class="suave">Activá la alerta y te avisamos con una notificación cuando salgan las entradas.</p>
+
+        @if (mensajeAlerta()) {
+          <p class="aviso">{{ mensajeAlerta() }}</p>
+        }
+
+        <div class="lista-proximas">
+          @for (p of proximamente(); track p.id) {
+            <article class="proxima">
+              <a [routerLink]="['/pelicula', p.id]" class="mini-poster">
+                <app-poster [nombre]="p.nombre" [imagen]="p.imagen" />
+              </a>
+              <div>
+                <h3>{{ p.nombre }}</h3>
+                <p class="fecha">Estreno {{ p.fecha_estreno + 'T00:00' | date: "EEEE d 'de' MMMM" }}</p>
+                @if (p.precio_preventa !== null) {
+                  <p class="suave">Preventa desde 7 días antes del estreno.</p>
+                }
+                @if (authS.usuarioActual()) {
+                  <button
+                    type="button"
+                    class="btn-chico"
+                    [class.btn-primario]="alertas().includes(p.id)"
+                    (click)="alternarAlerta(p)"
+                  >
+                    {{ alertas().includes(p.id) ? '🔔 Alerta activada' : '🔔 Avisarme' }}
+                  </button>
+                } @else {
+                  <a routerLink="/auth/login" class="btn btn-chico">Ingresá para activar la alerta</a>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

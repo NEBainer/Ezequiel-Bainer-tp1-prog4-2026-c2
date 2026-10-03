@@ -1,0 +1,103 @@
+section {
+  margin-bottom: 2.75rem;
+}
+
+.sobretitulo {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--acento);
+  margin-bottom: 0.25rem;
+}
+
+.podio {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.destacada {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42% 1fr;
+  gap: 0.9rem;
+  align-items: end;
+  padding: 0.9rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+
+.destacada:hover {
+  border-color: var(--acento);
+}
+
+.puesto {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.8rem;
+  font-family: var(--fuente-titulo);
+  font-weight: 800;
+  font-size: 3.2rem;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--acento);
+}
+
+.info h2 {
+  font-size: 1.15rem;
+}
+
+.info p {
+  font-size: 0.85rem;
+}
+
+.buscador {
+  max-width: 20rem;
+  border-radius: 999px;
+}
+
+.filtros {
+  margin-bottom: 1.25rem;
+}
+
+.lista-proximas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.proxima {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.proxima h3 {
+  margin-bottom: 0.2rem;
+}
+
+.fecha {
+  color: var(--acento);
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+
+@media (max-width: 860px) {
+  .podio {
+    grid-template-columns: 1fr;
+  }
+
+  .destacada {
+    grid-template-columns: 110px 1fr;
+  }
+}

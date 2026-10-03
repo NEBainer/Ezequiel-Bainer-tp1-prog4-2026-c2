@@ -1,16 +1,37 @@
 <header>
-  <nav>
-    <a routerLink="/">Inicio</a>
-    @if (authS.usuarioActual()) {
-      <span>{{ authS.usuarioActual()?.email }} ({{ authS.rol() }})</span>
-      <button (click)="cerrarSesion()">Cerrar sesión</button>
-    } @else {
-      <a routerLink="/auth/login">Ingresar</a>
-      <a routerLink="/auth/registro">Registrarse</a>
-    }
-  </nav>
+  <div class="barra">
+    <a routerLink="/" class="logo" aria-label="Fotograma, inicio">
+      <img src="logo.svg" alt="" width="34" height="34" />
+      <span>Fotograma</span>
+    </a>
+
+    <nav>
+      <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Cartelera</a>
+
+      @if (authS.usuarioActual()) {
+        @if (authS.rol() === 'empleado' || authS.rol() === 'admin') {
+          <a routerLink="/validar" routerLinkActive="activo">Validar QR</a>
+        }
+        @if (authS.rol() === 'admin') {
+          <a routerLink="/admin" routerLinkActive="activo">Admin</a>
+        }
+        <a routerLink="/mis-peliculas" routerLinkActive="activo">Mis películas</a>
+        <a routerLink="/perfil" routerLinkActive="activo" class="usuario">
+          {{ authS.perfil()?.nombre ?? 'Mi perfil' }}
+        </a>
+        <button class="btn-chico" (click)="cerrarSesion()">Salir</button>
+      } @else {
+        <a routerLink="/auth/login" routerLinkActive="activo">Ingresar</a>
+        <a routerLink="/auth/registro" class="btn btn-primario btn-chico">Registrarme</a>
+      }
+    </nav>
+  </div>
 </header>
 
 <main>
   <router-outlet />
 </main>
+
+<footer>
+  <p>Fotograma · Un solo edificio, todas las historias.</p>
+</footer>

@@ -1,0 +1,91 @@
+section {
+  margin-bottom: 1.5rem;
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.promedio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  --tam: 1.2rem;
+}
+
+.sinopsis {
+  font-size: 1.05rem;
+  max-width: 60ch;
+}
+
+.dias {
+  margin: 0.75rem 0 1rem;
+}
+
+.horarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.6rem;
+}
+
+.horario {
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radio-chico);
+  background: var(--superficie-2);
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.horario strong {
+  font-size: 1.3rem;
+  font-family: var(--fuente-titulo);
+}
+
+.horario:hover {
+  border-color: var(--acento);
+}
+
+.resenas form {
+  margin-bottom: 1rem;
+  max-width: 40rem;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.resena {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--borde);
+  max-width: 40rem;
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 640px) {
+  .ficha {
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+  }
+}

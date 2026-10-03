@@ -1,7 +1,67 @@
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgb(19 16 14 / 85%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borde);
+}
+
+.barra {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--texto);
+  text-decoration: none;
+  font-family: var(--fuente-titulo);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
 nav {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #ddd;
+  gap: 0.25rem 1rem;
+  flex-wrap: wrap;
+}
+
+nav a:not(.btn) {
+  color: var(--texto-suave);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+nav a:not(.btn):hover,
+nav a.activo {
+  color: var(--texto);
+  border-bottom-color: var(--acento);
+}
+
+.usuario {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+footer {
+  border-top: 1px solid var(--borde);
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  padding: 1.5rem 1rem;
 }
