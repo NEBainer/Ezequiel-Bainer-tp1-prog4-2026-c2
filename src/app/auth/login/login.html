@@ -1,4 +1,4 @@
-<form [formGroup]="formulario" (ngSubmit)="accion()">
+<form [formGroup]="formulario" (ngSubmit)="accion()" class="panel form-angosto">
   <h2>Ingresar</h2>
 
   <div class="campo">
@@ -26,6 +26,6 @@
     <p class="error">{{ error() }}</p>
   }
 
-  <button type="submit">Ingresar</button>
-  <p>¿No tenés cuenta? <a routerLink="/auth/registro">Registrate</a></p>
+  <button type="submit" class="btn-primario">Ingresar</button>
+  <p>¿No tenés cuenta? <a routerLink="/auth/registro">Registrate</a> y obtené un cupón en tu primera compra.</p>
 </form>

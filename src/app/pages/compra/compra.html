@@ -1,0 +1,334 @@
+<div class="contenedor">
+  @if (cargando()) {
+    <p class="suave">Preparando la sala…</p>
+  } @else if (!funcion() || !pelicula()) {
+    <p class="vacio">Esa función no existe. <a routerLink="/">Volver a la cartelera</a></p>
+  } @else {
+    @let f = funcion()!;
+    @let p = pelicula()!;
+
+    <!-- Encabezado: qué función se está comprando + pasos -->
+    <header class="cabecera">
+      <div>
+        <a [routerLink]="['/pelicula', p.id]" class="volver">← {{ p.nombre }}</a>
+        <p class="suave funcion">
+          {{ f.inicio | date: "EEEE d/M · HH:mm" }} h · {{ f.salas?.nombre }} · {{ f.formato }} · {{ f.idioma }} ·
+          {{ p.duracion | duracion }}
+        </p>
+      </div>
+      @if (paso() !== 'listo') {
+        <ol class="pasos" aria-label="Pasos de la compra">
+          <li [class.actual]="paso() === 'modo'">Cuenta</li>
+          <li [class.actual]="paso() === 'butacas'">Butacas</li>
+          <li [class.actual]="paso() === 'candy'">Candy</li>
+          <li [class.actual]="paso() === 'pago'">Pago</li>
+        </ol>
+      }
+    </header>
+
+    @if (error()) {
+      <p class="aviso peligro" role="alert">{{ error() }}</p>
+    }
+
+    <!-- ===================== PASO 1: registrado o anónimo ===================== -->
+    @if (paso() === 'modo') {
+      <section class="opciones">
+        <article class="panel opcion">
+          <h2>Con mi cuenta</h2>
+          <ul class="beneficios">
+            <li>Cupón de {{ config()?.porcentaje_primera_compra }}% en tu primera compra</li>
+            <li>Sumás 1 punto por cada peso y los canjeás por entradas o candy</li>
+            <li>Tus entradas quedan guardadas en tu perfil y podés cancelarlas</li>
+          </ul>
+          @if (authS.usuarioActual()) {
+            @if (bloqueoEdad()) {
+              <p class="aviso peligro">
+                Esta película es para mayores de {{ p.edad_minima }} años y según tu fecha de nacimiento no podés comprarla.
+              </p>
+            } @else {
+              <button class="btn-primario" (click)="elegirRegistrado()">
+                Continuar como {{ authS.perfil()?.nombre ?? authS.usuarioActual()?.email }}
+              </button>
+            }
+          } @else {
+            <div class="acciones">
+              <button class="btn-primario" (click)="irALogin()">Ingresar</button>
+              <a routerLink="/auth/registro" class="btn">Crear cuenta</a>
+            </div>
+          }
+        </article>
+
+        <article class="panel opcion">
+          <h2>Como anónimo</h2>
+          <p class="suave">Comprás sin dar ningún dato. No sumás puntos ni usás cupones, y la entrada solo queda en el PDF que descargues.</p>
+          @if (p.edad_minima) {
+            <label class="check">
+              <input type="checkbox" [formControl]="declaracionEdad" />
+              <span>Declaro que quien va a ver la película tiene {{ p.edad_minima }} años o más.</span>
+            </label>
+          }
+          <button (click)="elegirAnonimo()">Comprar como anónimo</button>
+        </article>
+      </section>
+    }
+
+    <!-- ===================== PASOS 2-4 (con resumen al costado) ===================== -->
+    @if (paso() === 'butacas' || paso() === 'candy' || paso() === 'pago') {
+      <div class="disposicion">
+        <section class="principal">
+          <!-- PASO 2: butacas -->
+          @if (paso() === 'butacas') {
+            <h2>Elegí tus butacas</h2>
+            <p class="suave">Las butacas se actualizan en tiempo real: si alguien compra mientras elegís, se marcan como ocupadas.</p>
+            @if (aviso()) {
+              <p class="aviso" role="status">{{ aviso() }}</p>
+            }
+            <app-mapa-butacas
+              [ocupadas]="ocupadas()"
+              [seleccionadas]="clavesSeleccionadas()"
+              (alternar)="alternarButaca($event)"
+            />
+          }
+
+          <!-- PASO 3: candy -->
+          @if (paso() === 'candy') {
+            <h2>Candy bar</h2>
+            <p class="suave">Lo retirás en el candy con el mismo QR de tu entrada.</p>
+
+            @if (combos().length) {
+              <h3 class="subtitulo">Combos destacados</h3>
+              <div class="combos">
+                @for (c of combos(); track c.id) {
+                  <article class="combo">
+                    <span class="etiqueta preventa">Combo</span>
+                    <h4>{{ c.nombre }}</h4>
+                    <p class="suave">{{ c.descripcion }}</p>
+                    <p class="precio">{{ c.precio | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</p>
+                    <div class="contador">
+                      <button type="button" (click)="cambiar(cantidadesCombos, c.id, -1)" [disabled]="!cantidadesCombos()[c.id]" aria-label="Quitar">−</button>
+                      <span>{{ cantidadesCombos()[c.id] ?? 0 }}</span>
+                      <button type="button" (click)="cambiar(cantidadesCombos, c.id, 1)" [disabled]="!puedeSumarCombo()" aria-label="Agregar">+</button>
+                    </div>
+                  </article>
+                }
+              </div>
+              <p class="suave nota">Cada combo incluye una de tus {{ seleccionadas().length }} entradas.</p>
+            }
+
+            <div class="categorias">
+              @for (cat of categorias(); track cat.id) {
+                @if (productosDe(cat.id).length) {
+                  <div>
+                    <h3 class="subtitulo">{{ cat.nombre }}</h3>
+                    @for (prod of productosDe(cat.id); track prod.id) {
+                      <div class="producto">
+                        <span>{{ prod.nombre }}</span>
+                        <span class="suave">{{ prod.precio | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</span>
+                        <div class="contador">
+                          <button type="button" (click)="cambiar(cantidadesProductos, prod.id, -1)" [disabled]="!cantidadesProductos()[prod.id]" aria-label="Quitar">−</button>
+                          <span>{{ cantidadesProductos()[prod.id] ?? 0 }}</span>
+                          <button type="button" (click)="cambiar(cantidadesProductos, prod.id, 1)" aria-label="Agregar">+</button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+
+            @if (registrado()) {
+              <div class="panel canjes">
+                <h3>Canjeá tus puntos <span class="puntos">{{ puntosRestantes() }} disponibles</span></h3>
+                <div class="producto">
+                  <span>Entrada gratis</span>
+                  <span class="suave">{{ config()?.puntos_entrada }} pts</span>
+                  <div class="contador">
+                    <button type="button" (click)="entradasGratis.set(entradasGratis() - 1)" [disabled]="!entradasGratis()" aria-label="Quitar">−</button>
+                    <span>{{ entradasGratis() }}</span>
+                    <button type="button" (click)="entradasGratis.set(entradasGratis() + 1)" [disabled]="!puedeCanjearEntrada()" aria-label="Agregar">+</button>
+                  </div>
+                </div>
+                @for (prod of productosCanjeables(); track prod.id) {
+                  <div class="producto">
+                    <span>{{ prod.nombre }}</span>
+                    <span class="suave">{{ prod.puntos }} pts</span>
+                    <div class="contador">
+                      <button type="button" (click)="cambiar(canjesProductos, prod.id, -1)" [disabled]="!canjesProductos()[prod.id]" aria-label="Quitar">−</button>
+                      <span>{{ canjesProductos()[prod.id] ?? 0 }}</span>
+                      <button type="button" (click)="cambiar(canjesProductos, prod.id, 1)" [disabled]="!puedeCanjear(prod)" aria-label="Agregar">+</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          <!-- PASO 4: pago -->
+          @if (paso() === 'pago') {
+            <h2>Pago</h2>
+
+            @if (butacasVip().length) {
+              <p class="aviso vip">
+                <span class="etiqueta vip">VIP</span>
+                Estás comprando {{ butacasVip().length }} butaca(s) VIP
+                ({{ butacasVip().length === 1 ? 'la' : 'las' }}
+                @for (b of butacasVip(); track b.fila + b.numero; let ultimo = $last) {
+                  {{ b.fila }}{{ b.numero }}{{ ultimo ? '' : ',' }}
+                })
+                con precio diferencial de {{ config()?.precio_vip | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}.
+              </p>
+            }
+
+            @if (registrado() && creditoDisponible() > 0) {
+              <label class="check panel credito">
+                <input type="checkbox" [checked]="usarCredito()" (change)="usarCredito.set(!usarCredito())" />
+                <span>
+                  Usar mi crédito ({{ creditoDisponible() | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }} disponibles)
+                </span>
+              </label>
+            }
+
+            @if ((detalle()?.aPagarConTarjeta ?? 0) > 0) {
+              <form [formGroup]="formPago" (ngSubmit)="confirmar()" class="tarjeta">
+                <p class="suave">Pago simulado: no se realiza ningún cobro real.</p>
+                <div class="campo">
+                  <label for="titular">Titular de la tarjeta</label>
+                  <input id="titular" formControlName="titular" autocomplete="cc-name" />
+                  @if (titular?.touched && titular?.errors?.['required']) {
+                    <small>Ingresá el nombre del titular</small>
+                  }
+                </div>
+                <div class="campo">
+                  <label for="numero">Número</label>
+                  <input id="numero" formControlName="numero" inputmode="numeric" maxlength="16" placeholder="16 dígitos" autocomplete="cc-number" />
+                  @if (numero?.touched && numero?.invalid) {
+                    <small>Tienen que ser 16 números</small>
+                  }
+                </div>
+                <div class="fila">
+                  <div class="campo">
+                    <label for="vencimiento">Vencimiento</label>
+                    <input id="vencimiento" formControlName="vencimiento" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" />
+                    @if (vencimiento?.touched) {
+                      @if (vencimiento?.errors?.['required'] || vencimiento?.errors?.['formato']) {
+                        <small>Formato MM/AA</small>
+                      }
+                      @if (vencimiento?.errors?.['vencida']) {
+                        <small>La tarjeta está vencida</small>
+                      }
+                    }
+                  </div>
+                  <div class="campo">
+                    <label for="cvv">CVV</label>
+                    <input id="cvv" formControlName="cvv" inputmode="numeric" maxlength="4" autocomplete="cc-csc" />
+                    @if (cvv?.touched && cvv?.invalid) {
+                      <small>3 o 4 números</small>
+                    }
+                  </div>
+                </div>
+              </form>
+            } @else {
+              <p class="aviso">No tenés que pagar nada con tarjeta: el total está cubierto.</p>
+            }
+          }
+        </section>
+
+        <!-- Resumen: siempre visible para no tener que scrollear -->
+        <aside class="resumen panel">
+          <h3>Tu compra</h3>
+          @if (seleccionadas().length) {
+            <p class="butacas-elegidas">
+              @for (b of seleccionadas(); track b.fila + b.numero) {
+                <span class="etiqueta" [class.vip]="b.tipo === 'vip'">
+                  {{ b.fila }}{{ b.numero }}{{ b.tipo === 'vip' ? ' VIP' : b.tipo === 'accesible' ? ' ♿' : '' }}
+                </span>
+              }
+            </p>
+          } @else {
+            <p class="suave">Todavía no elegiste butacas.</p>
+          }
+
+          @if (detalle(); as d) {
+            <table>
+              <tbody>
+                @for (l of d.lineas; track l.descripcion) {
+                  <tr>
+                    <td>{{ l.cantidad }} × {{ l.descripcion }}</td>
+                    <td class="monto">{{ l.total | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                  </tr>
+                }
+                @if (d.cupon) {
+                  <tr class="ok">
+                    <td>Cupón {{ d.cupon.nombre }} ({{ d.cupon.porcentaje }}%)</td>
+                    <td class="monto">−{{ d.descuento | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                  </tr>
+                }
+                <tr class="total">
+                  <td>Total</td>
+                  <td class="monto">{{ d.total | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                </tr>
+                @if (d.creditoUsado > 0) {
+                  <tr>
+                    <td>Pagado con crédito</td>
+                    <td class="monto">−{{ d.creditoUsado | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                  </tr>
+                  <tr>
+                    <td>Con tarjeta</td>
+                    <td class="monto">{{ d.aPagarConTarjeta | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (registrado()) {
+              <p class="suave puntos-ganados">
+                Sumás <strong>{{ d.puntosAGanar }}</strong> puntos
+                @if (d.puntosUsados) {
+                  · usás {{ d.puntosUsados }}
+                }
+              </p>
+            }
+          }
+
+          <div class="navegacion">
+            @switch (paso()) {
+              @case ('butacas') {
+                <button (click)="irA('modo')">Atrás</button>
+                <button class="btn-primario" (click)="irA('candy')" [disabled]="!seleccionadas().length">Siguiente</button>
+              }
+              @case ('candy') {
+                <button (click)="irA('butacas')">Atrás</button>
+                <button class="btn-primario" (click)="irA('pago')">Ir a pagar</button>
+              }
+              @case ('pago') {
+                <button (click)="irA('candy')">Atrás</button>
+                <button class="btn-primario" (click)="confirmar()" [disabled]="procesando()">
+                  {{ procesando() ? 'Procesando…' : 'Confirmar y pagar' }}
+                </button>
+              }
+            }
+          </div>
+        </aside>
+      </div>
+    }
+
+    <!-- ===================== PASO 5: entrada ===================== -->
+    @if (paso() === 'listo' && compraHecha()) {
+      <section class="listo">
+        <h1>¡Listo! Tu entrada está confirmada</h1>
+        <p class="suave">
+          Mostrá el QR (o dictá el código) en el ingreso a la sala y en el candy bar.
+          @if (!registrado()) {
+            <strong>Compraste como anónimo: descargá el PDF, no vas a poder recuperarla después.</strong>
+          }
+        </p>
+        <app-entrada-ticket [compra]="compraHecha()!" />
+        <div class="acciones">
+          @if (registrado()) {
+            <a routerLink="/perfil" class="btn">Ver mis entradas</a>
+          }
+          <a routerLink="/" class="btn">Volver a la cartelera</a>
+        </div>
+      </section>
+    }
+  }
+</div>

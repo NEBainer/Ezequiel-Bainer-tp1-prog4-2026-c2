@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth.service';
@@ -15,6 +15,9 @@ export class Login {
   routerS = inject(Router);
 
   error = signal<string | null>(null);
+
+  // ?volver=/comprar/12 -> después de ingresar vuelve a la compra (llega por withComponentInputBinding)
+  volver = input<string>();
 
   formulario = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -39,7 +42,9 @@ export class Login {
     if (error) {
       this.error.set('Email o contraseña incorrectos.');
     } else {
-      this.routerS.navigateByUrl('/');
+      // Solo rutas internas (que empiecen con "/") para no redirigir a otro sitio
+      const destino = this.volver();
+      this.routerS.navigateByUrl(destino?.startsWith('/') && !destino.startsWith('//') ? destino : '/');
     }
   }
 }

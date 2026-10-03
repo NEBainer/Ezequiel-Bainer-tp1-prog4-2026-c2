@@ -12,9 +12,10 @@ import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth.service';
 import { DbService } from '../../services/db.service';
 import { RegistroUsuario } from '../../interfaces/Usuario';
+import { SelectorFecha } from '../../components/selector-fecha/selector-fecha';
 
 @Component({
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, SelectorFecha],
   selector: 'app-registro',
   styleUrl: './registro.css',
   templateUrl: './registro.html',
@@ -53,7 +54,8 @@ export class Registro {
         return null; // de "vacío" se encarga Validators.required
       }
       const fecha = new Date(control.value);
-      if (fecha > new Date() || fecha.getFullYear() < 1900) {
+      // isNaN: el selector de fecha escribe 'invalida' si la fecha no existe (ej. 31/2)
+      if (isNaN(fecha.getTime()) || fecha > new Date() || fecha.getFullYear() < 1900) {
         return { fechaPasada: true };
       }
       return null;
@@ -74,7 +76,7 @@ export class Registro {
     return this.formulario.get('apellido');
   }
   get fechaNacimiento() {
-    return this.formulario.get('fecha_nacimiento');
+    return this.formulario.controls.fecha_nacimiento;
   }
   get tipoSangre() {
     return this.formulario.get('tipo_sangre');
