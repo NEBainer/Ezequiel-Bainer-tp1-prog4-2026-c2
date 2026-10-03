@@ -1,38 +1,346 @@
-/* Estilos base provisorios. La paleta y tipografía definitivas se definen con la marca del cine. */
+/* =========================================================
+   Fotograma — estilos globales
+   Paleta: negro cálido de sala + ámbar de proyector + crema de pantalla.
+   Las butacas usan colores propios (accesible = verde agua, VIP = violeta).
+   ========================================================= */
+
+:root {
+  --fondo: #13100e;
+  --superficie: #1d1916;
+  --superficie-2: #27211d;
+  --borde: #3a322c;
+  --texto: #f3ece2;
+  --texto-suave: #b5aa9c;
+  --acento: #f2a541;
+  --acento-oscuro: #c97f1c;
+  --acento-texto: #1a1206;
+  --peligro: #e5675a;
+  --exito: #6cc58a;
+  --butaca-libre: #4a4039;
+  --butaca-ocupada: #2a2420;
+  --butaca-accesible: #3fb8af;
+  --butaca-vip: #b07ae8;
+  --radio: 14px;
+  --radio-chico: 8px;
+  --sombra: 0 10px 30px rgb(0 0 0 / 35%);
+  --fuente-titulo: 'Bricolage Grotesque', system-ui, sans-serif;
+  --fuente: 'DM Sans', system-ui, sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
 
+html {
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 500px at 50% -200px, rgb(242 165 65 / 10%), transparent 70%),
+    var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente);
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
 }
 
-main {
-  padding: 1rem;
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--fuente-titulo);
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
 }
 
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+a {
+  color: var(--acento);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.contenedor {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+.suave {
+  color: var(--texto-suave);
+}
+
+/* ---------- Botones ---------- */
+button,
+.btn {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--texto);
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+}
+
+button:hover,
+.btn:hover {
+  border-color: var(--acento);
+}
+
+button:active,
+.btn:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primario {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--acento-texto);
+  font-weight: 700;
+}
+
+.btn-primario:hover {
+  background: var(--acento-oscuro);
+  border-color: var(--acento-oscuro);
+}
+
+.btn-peligro {
+  border-color: var(--peligro);
+  color: var(--peligro);
+  background: transparent;
+}
+
+.btn-chico {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Chips: se usan para elegir días, horarios, géneros (en vez de calendarios desplegables) */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+}
+
+.chip.activo {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--acento-texto);
+  font-weight: 700;
+}
+
+/* ---------- Tarjetas y paneles ---------- */
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+}
+
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 1rem;
+}
+
+.etiqueta {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 6px;
+  background: var(--superficie-2);
+  border: 1px solid var(--borde);
+  color: var(--texto-suave);
+}
+
+.etiqueta.edad {
+  background: var(--peligro);
+  border-color: var(--peligro);
+  color: #fff;
+}
+
+.etiqueta.vip {
+  background: var(--butaca-vip);
+  border-color: var(--butaca-vip);
+  color: #1a0f24;
+}
+
+.etiqueta.preventa {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--acento-texto);
+}
+
+/* ---------- Formularios ---------- */
 form {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  max-width: 40rem;
+  gap: 0.9rem;
+}
+
+.form-angosto {
+  max-width: 34rem;
   margin: 0 auto;
 }
 
 .fila {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.9rem;
 }
 
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
+}
+
+label {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--texto);
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  padding: 0.6rem 0.75rem;
+  width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: auto;
+  accent-color: var(--acento);
+}
+
+.check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  color: var(--texto);
 }
 
 .campo small,
 .error {
-  color: #b3261e;
+  color: var(--peligro);
+}
+
+.ok {
+  color: var(--exito);
+}
+
+/* ---------- Tablas ---------- */
+.tabla-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+th {
+  color: var(--texto-suave);
+  font-weight: 500;
+}
+
+/* ---------- Varios ---------- */
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.vacio {
+  padding: 2rem;
+  text-align: center;
+  color: var(--texto-suave);
+  border: 1px dashed var(--borde);
+  border-radius: var(--radio);
+}
+
+.aviso {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radio-chico);
+  background: rgb(242 165 65 / 12%);
+  border: 1px solid rgb(242 165 65 / 40%);
+}
+
+.aviso.peligro {
+  background: rgb(229 103 90 / 12%);
+  border-color: rgb(229 103 90 / 45%);
+}
+
+@media (max-width: 600px) {
+  .contenedor {
+    padding: 1rem 0.75rem 3rem;
+  }
 }

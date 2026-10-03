@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Fotograma: un cuadro de película con perforaciones y un haz de luz -->
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#f2a541"/>
+  <g fill="#13100e">
+    <rect x="9" y="11" width="5" height="6" rx="1.5"/>
+    <rect x="9" y="22" width="5" height="6" rx="1.5"/>
+    <rect x="9" y="33" width="5" height="6" rx="1.5"/>
+    <rect x="9" y="44" width="5" height="6" rx="1.5"/>
+    <rect x="50" y="11" width="5" height="6" rx="1.5"/>
+    <rect x="50" y="22" width="5" height="6" rx="1.5"/>
+    <rect x="50" y="33" width="5" height="6" rx="1.5"/>
+    <rect x="50" y="44" width="5" height="6" rx="1.5"/>
+    <rect x="18" y="10" width="28" height="44" rx="4"/>
+  </g>
+  <path d="M25 19h15v5h-9.5v5H38v5h-7.5v11H25z" fill="#f3ece2"/>
+</svg>
