@@ -1,0 +1,133 @@
+<div class="contenedor">
+  @if (cargando()) {
+    <p class="suave">Cargando tu perfil…</p>
+  } @else {
+    <header class="encabezado">
+      <div>
+        <h1>Hola, {{ authS.perfil()?.nombre }}</h1>
+        <p class="suave">{{ authS.usuarioActual()?.email }}</p>
+      </div>
+      <a routerLink="/mis-peliculas" class="btn">Mis películas</a>
+    </header>
+
+    <!-- Saldos -->
+    <section class="saldos">
+      <div class="panel saldo">
+        <p class="suave">Puntos acumulados</p>
+        <p class="numero">{{ puntos() }}</p>
+        <p class="suave chico">1 punto por cada peso. Se canjean al comprar. No son transferibles.</p>
+      </div>
+      <div class="panel saldo">
+        <p class="suave">Crédito en tu cuenta</p>
+        <p class="numero">{{ credito() | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</p>
+        <p class="suave chico">Viene de compras canceladas. Se usa al pagar.</p>
+      </div>
+      <div class="panel datos">
+        <p class="suave">Tus datos</p>
+        @if (authS.perfil(); as p) {
+          <dl>
+            <dt>Nombre</dt>
+            <dd>{{ p.nombre }} {{ p.apellido }}</dd>
+            <dt>Nacimiento</dt>
+            <dd>{{ p.fecha_nacimiento + 'T12:00' | date: 'd/M/yyyy' }}</dd>
+            <dt>Sangre</dt>
+            <dd>{{ p.tipo_sangre }}</dd>
+            <dt>Ojos</dt>
+            <dd>{{ p.color_ojos }}</dd>
+            <dt>Vacaciones</dt>
+            <dd>{{ p.dias_vacaciones }} días/año</dd>
+          </dl>
+        }
+      </div>
+    </section>
+
+    @if (mensaje()) {
+      <p class="aviso" role="status">{{ mensaje() }}</p>
+    }
+
+    <!-- Próximas funciones -->
+    <section>
+      <h2>Tus entradas</h2>
+      @for (c of proximas(); track c.id) {
+        <div class="entrada">
+          <app-entrada-ticket [compra]="c" />
+          <div class="cancelar">
+            @if (sePuedeCancelar(c)) {
+              @if (aCancelar() === c.id) {
+                <span>¿Cancelar? Te devolvemos {{ +c.pagado_tarjeta + +c.pagado_credito | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }} como crédito.</span>
+                <button class="btn-chico btn-peligro" (click)="cancelar(c)">Sí, cancelar</button>
+                <button class="btn-chico" (click)="aCancelar.set(null)">No</button>
+              } @else {
+                <button class="btn-chico btn-peligro" (click)="aCancelar.set(c.id)">Cancelar compra</button>
+              }
+            } @else {
+              <span class="suave chico">Ya no se puede cancelar (límite: {{ horasLimite }} h antes de la función).</span>
+            }
+          </div>
+        </div>
+      } @empty {
+        <p class="vacio">No tenés entradas para próximas funciones. <a routerLink="/">Ver cartelera</a></p>
+      }
+    </section>
+
+    <!-- Historial de canjes -->
+    <section>
+      <h2>Historial de canjes</h2>
+      @if (canjes().length) {
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Canje</th>
+                <th>Puntos</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of canjes(); track $index) {
+                <tr>
+                  <td>{{ c.created_at | date: 'd/M/yy HH:mm' }}</td>
+                  <td>{{ c.descripcion }}</td>
+                  <td>−{{ c.puntos }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="suave">Todavía no canjeaste puntos.</p>
+      }
+    </section>
+
+    <!-- Compras pasadas o canceladas -->
+    @if (historial().length) {
+      <section>
+        <h2>Compras anteriores</h2>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Función</th>
+                <th>Película</th>
+                <th>Total</th>
+                <th>Puntos</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of historial(); track c.id) {
+                <tr>
+                  <td>{{ c.funciones?.inicio | date: 'd/M/yy HH:mm' }}</td>
+                  <td>{{ c.peliculas?.nombre }}</td>
+                  <td>{{ c.total | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                  <td>{{ c.estado === 'activa' ? '+' + c.puntos_ganados : '—' }}</td>
+                  <td>{{ c.estado === 'cancelada' ? 'Cancelada (crédito)' : 'Vista' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  }
+</div>

@@ -1,0 +1,64 @@
+section {
+  margin-bottom: 2rem;
+}
+
+.saldos {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 1rem;
+}
+
+.saldo p,
+.datos p {
+  margin: 0;
+}
+
+.numero {
+  font-family: var(--fuente-titulo);
+  font-weight: 800;
+  font-size: 2.4rem;
+  color: var(--acento);
+}
+
+.chico {
+  font-size: 0.82rem;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 1rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+}
+
+dt {
+  color: var(--texto-suave);
+}
+
+dd {
+  margin: 0;
+}
+
+.entrada {
+  margin-bottom: 1rem;
+}
+
+.cancelar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .saldos {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .datos {
+    grid-column: 1 / -1;
+  }
+}
