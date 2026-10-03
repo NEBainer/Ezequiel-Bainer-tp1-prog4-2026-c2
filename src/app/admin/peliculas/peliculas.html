@@ -1,0 +1,145 @@
+<header class="encabezado">
+  <div>
+    <h1>Películas</h1>
+    <p class="suave">Elegí qué se muestra en la cartelera, con sus géneros, edad mínima y preventa.</p>
+  </div>
+  <button class="btn-primario" (click)="nueva()">+ Nueva película</button>
+</header>
+
+@if (mensaje()) {
+  <p class="aviso" role="status">{{ mensaje() }}</p>
+}
+
+@if (formularioAbierto()) {
+  <form [formGroup]="formulario" (ngSubmit)="guardar()" class="panel formulario">
+    <h2>{{ editando() ? 'Editar ' + editando()!.nombre : 'Nueva película' }}</h2>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" formControlName="nombre" />
+        @if (formulario.controls.nombre.touched && formulario.controls.nombre.invalid) {
+          <small>El nombre es requerido</small>
+        }
+      </div>
+      <div class="campo">
+        <label for="duracion">Duración (minutos)</label>
+        <input id="duracion" type="number" formControlName="duracion" />
+        @if (formulario.controls.duracion.touched && formulario.controls.duracion.invalid) {
+          <small>Entre 30 y 400 minutos</small>
+        }
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="sinopsis">Sinopsis</label>
+      <textarea id="sinopsis" rows="3" formControlName="sinopsis"></textarea>
+      @if (formulario.controls.sinopsis.touched && formulario.controls.sinopsis.invalid) {
+        <small>La sinopsis es requerida (máx. 600 caracteres)</small>
+      }
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label>Fecha de estreno</label>
+        <app-selector-fecha
+          [control]="formulario.controls.fecha_estreno"
+          etiqueta="Fecha de estreno"
+          [anioDesde]="anioActual - 1"
+          [anioHasta]="anioActual + 2"
+        />
+        @if (formulario.controls.fecha_estreno.touched && (formulario.controls.fecha_estreno.invalid || formulario.value.fecha_estreno === 'invalida')) {
+          <small>Elegí una fecha válida</small>
+        }
+      </div>
+      <div class="campo">
+        <label for="edad">Restricción de edad</label>
+        <select id="edad" formControlName="edad_minima">
+          <option value="">Apta todo público</option>
+          <option value="13">+13</option>
+          <option value="18">+18</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="preventa">Precio de preventa (opcional)</label>
+        <input id="preventa" type="number" formControlName="precio_preventa" placeholder="Sin preventa" />
+        <span class="suave ayuda">Si tiene precio, la venta abre 7 días antes del estreno a ese valor.</span>
+      </div>
+      <div class="campo">
+        <label for="imagen">Póster</label>
+        <input id="imagen" type="file" accept="image/png, image/jpeg, image/webp" (input)="elegirImagen($event)" />
+        <span class="suave ayuda">PNG, JPG o WEBP de hasta 2 MB.</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Géneros</label>
+      <div class="chips">
+        @for (g of generos(); track g.id) {
+          <button
+            type="button"
+            class="chip"
+            [class.activo]="formulario.value.generos?.includes(g.id)"
+            (click)="alternarGenero(g.id)"
+          >
+            {{ g.nombre }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" formControlName="en_cartelera" />
+      <span>Mostrar en la página (cartelera / próximamente)</span>
+    </label>
+
+    <div class="acciones">
+      <button type="submit" class="btn-primario" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Guardar' }}
+      </button>
+      <button type="button" (click)="cerrar()">Cancelar</button>
+    </div>
+  </form>
+}
+
+<div class="tabla-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Película</th>
+        <th>Estreno</th>
+        <th>Edad</th>
+        <th>Preventa</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (p of peliculas(); track p.id) {
+        <tr>
+          <td class="mini"><app-poster [nombre]="p.nombre" [imagen]="p.imagen" /></td>
+          <td>
+            <strong>{{ p.nombre }}</strong><br />
+            <span class="suave">{{ p.duracion | duracion }}</span>
+          </td>
+          <td>{{ p.fecha_estreno + 'T12:00' | date: 'd/M/yy' }}</td>
+          <td>{{ p.edad_minima ? '+' + p.edad_minima : 'ATP' }}</td>
+          <td>{{ p.precio_preventa ? (p.precio_preventa | currency: 'ARS' : 'symbol-narrow' : '1.0-0') : '—' }}</td>
+          <td><span class="etiqueta">{{ estado(p) }}</span></td>
+          <td class="acciones-fila">
+            <button class="btn-chico" (click)="editar(p)">Editar</button>
+            <button class="btn-chico" (click)="alternarCartelera(p)">{{ p.en_cartelera ? 'Ocultar' : 'Mostrar' }}</button>
+            @if (aLaVenta(p)) {
+              <button class="btn-chico" (click)="avisar(p)" title="Notifica a quienes activaron la alerta">🔔 Avisar</button>
+            }
+            <button class="btn-chico btn-peligro" (click)="borrar(p)">Borrar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,118 @@
+<header class="encabezado">
+  <div>
+    <h1>Reportes</h1>
+    <p class="suave">Facturación por día, entradas vendidas y lo más elegido.</p>
+  </div>
+  <div class="chips" role="group" aria-label="Período">
+    @for (p of periodos; track p.dias) {
+      <button type="button" class="chip" [class.activo]="periodo() === p.dias" (click)="periodo.set(p.dias)">
+        {{ p.nombre }}
+      </button>
+    }
+  </div>
+</header>
+
+@if (cargando()) {
+  <p class="suave">Cargando…</p>
+} @else {
+  <!-- Números principales -->
+  <section class="kpis">
+    <div class="panel kpi">
+      <p class="suave">Facturado</p>
+      <p class="valor">{{ totales().facturado | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</p>
+    </div>
+    <div class="panel kpi">
+      <p class="suave">Entradas vendidas</p>
+      <p class="valor">{{ totales().entradas }}</p>
+    </div>
+    <div class="panel kpi">
+      <p class="suave">Compras</p>
+      <p class="valor">{{ totales().compras }}</p>
+    </div>
+    <div class="panel kpi">
+      <p class="suave">Ticket promedio</p>
+      <p class="valor">{{ totales().promedio | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</p>
+    </div>
+  </section>
+
+  <div class="disposicion">
+    <!-- Facturación por día -->
+    <section class="panel">
+      <div class="titulo-seccion">
+        <h2>Facturación por día</h2>
+        <div class="acciones">
+          <button class="btn-chico" (click)="exportarPdf()">⬇ PDF</button>
+          <button class="btn-chico" (click)="exportarExcel()">⬇ Excel</button>
+        </div>
+      </div>
+      <div class="tabla-scroll tabla-dias">
+        <table>
+          <thead>
+            <tr><th>Día</th><th>Compras</th><th>Entradas</th><th class="num">Facturado</th></tr>
+          </thead>
+          <tbody>
+            @for (f of porDia(); track f.dia) {
+              <tr>
+                <td>{{ fechaDia(f.dia) | date: 'EEE d/M' }}</td>
+                <td>{{ f.compras }}</td>
+                <td>{{ f.entradas }}</td>
+                <td class="num">{{ f.facturado | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="suave">Sin ventas en el período.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="columna">
+      <!-- Películas más vistas -->
+      <section class="panel">
+        <div class="titulo-seccion">
+          <h2>Películas más vistas</h2>
+          <div class="chips">
+            <button type="button" class="chip" [class.activo]="rangoPeliculas() === 7" (click)="rangoPeliculas.set(7)">Semana</button>
+            <button type="button" class="chip" [class.activo]="rangoPeliculas() === 30" (click)="rangoPeliculas.set(30)">Mes</button>
+          </div>
+        </div>
+        <p class="suave chico">Entradas vendidas</p>
+        @let maxPeliculas = maximo(peliculasMasVistas());
+        @for (b of peliculasMasVistas(); track b.nombre) {
+          <div class="barra" [title]="b.nombre + ': ' + b.valor + ' entradas'">
+            <span class="etiqueta-barra">{{ b.nombre }}</span>
+            <div class="pista">
+              <div class="relleno" [style.width.%]="(b.valor / maxPeliculas) * 100"></div>
+            </div>
+            <span class="numero">{{ b.valor }}</span>
+          </div>
+        } @empty {
+          <p class="suave">Sin datos.</p>
+        }
+      </section>
+
+      <!-- Candy más vendido -->
+      <section class="panel">
+        <h2>Lo más vendido del candy</h2>
+        <p class="suave chico">Unidades · {{ nombrePeriodo() }}</p>
+        @let maxProductos = maximo(productosMasVendidos());
+        @for (b of productosMasVendidos(); track b.nombre; let primero = $first) {
+          <div class="barra" [title]="b.nombre + ': ' + b.valor + ' unidades'">
+            <span class="etiqueta-barra">
+              @if (primero) {
+                🏆
+              }
+              {{ b.nombre }}
+            </span>
+            <div class="pista">
+              <div class="relleno" [style.width.%]="(b.valor / maxProductos) * 100"></div>
+            </div>
+            <span class="numero">{{ b.valor }}</span>
+          </div>
+        } @empty {
+          <p class="suave">Sin ventas de candy.</p>
+        }
+      </section>
+    </div>
+  </div>
+}

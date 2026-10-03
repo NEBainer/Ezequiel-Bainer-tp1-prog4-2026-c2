@@ -1,0 +1,134 @@
+<header class="encabezado">
+  <div>
+    <h1>Candy bar</h1>
+    <p class="suave">Productos por categoría, su costo en puntos y los combos con entrada incluida.</p>
+  </div>
+</header>
+
+@if (mensaje()) {
+  <p class="aviso peligro">{{ mensaje() }}</p>
+}
+
+<div class="disposicion">
+  <!-- Productos -->
+  <section class="panel">
+    <h2>Productos</h2>
+    <form [formGroup]="formProducto" (ngSubmit)="guardarProducto()" class="form-linea">
+      <div class="fila">
+        <div class="campo">
+          <label for="p-nombre">Nombre</label>
+          <input id="p-nombre" formControlName="nombre" />
+        </div>
+        <div class="campo">
+          <label for="p-categoria">Categoría</label>
+          <select id="p-categoria" formControlName="categoria_id">
+            <option [ngValue]="null" disabled>Elegí</option>
+            @for (c of categorias(); track c.id) {
+              <option [ngValue]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="fila">
+        <div class="campo">
+          <label for="p-precio">Precio ($)</label>
+          <input id="p-precio" type="number" formControlName="precio" />
+        </div>
+        <div class="campo">
+          <label for="p-puntos">Costo en puntos</label>
+          <input id="p-puntos" type="number" formControlName="puntos" placeholder="No canjeable" />
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" formControlName="activo" /> <span>Disponible para la venta</span></label>
+      @if (formProducto.touched && formProducto.invalid) {
+        <small class="error">Completá nombre, categoría y precio.</small>
+      }
+      <div class="acciones">
+        <button type="submit" class="btn-primario">{{ productoEditando() ? 'Guardar cambios' : 'Agregar producto' }}</button>
+        @if (productoEditando()) {
+          <button type="button" (click)="cancelarProducto()">Cancelar</button>
+        }
+      </div>
+    </form>
+
+    <div class="tabla-scroll">
+      <table>
+        <thead>
+          <tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Puntos</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (p of productos(); track p.id) {
+            <tr [class.inactivo]="!p.activo">
+              <td>{{ p.nombre }}</td>
+              <td>{{ nombreCategoria(p.categoria_id) }}</td>
+              <td>{{ p.precio | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+              <td>{{ p.puntos ?? '—' }}</td>
+              <td class="acciones-fila">
+                <button class="btn-chico" (click)="editarProducto(p)">Editar</button>
+                <button class="btn-chico btn-peligro" (click)="borrarProducto(p)">✕</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="columna">
+    <!-- Combos -->
+    <section class="panel">
+      <h2>Combos</h2>
+      <form [formGroup]="formCombo" (ngSubmit)="guardarCombo()">
+        <div class="campo">
+          <label for="c-nombre">Nombre</label>
+          <input id="c-nombre" formControlName="nombre" />
+        </div>
+        <div class="campo">
+          <label for="c-desc">Qué incluye</label>
+          <input id="c-desc" formControlName="descripcion" placeholder="Entrada + pochoclo + bebida" />
+        </div>
+        <div class="campo">
+          <label for="c-precio">Precio fijo ($)</label>
+          <input id="c-precio" type="number" formControlName="precio" />
+        </div>
+        <label class="check"><input type="checkbox" formControlName="activo" /> <span>Activo</span></label>
+        <div class="acciones">
+          <button type="submit" class="btn-primario">{{ comboEditando() ? 'Guardar cambios' : 'Agregar combo' }}</button>
+          @if (comboEditando()) {
+            <button type="button" (click)="cancelarCombo()">Cancelar</button>
+          }
+        </div>
+      </form>
+
+      @for (c of combos(); track c.id) {
+        <div class="item" [class.inactivo]="!c.activo">
+          <div>
+            <strong>{{ c.nombre }}</strong> · {{ c.precio | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}<br />
+            <span class="suave">{{ c.descripcion }}</span>
+          </div>
+          <div class="acciones-fila">
+            <button class="btn-chico" (click)="editarCombo(c)">Editar</button>
+            <button class="btn-chico btn-peligro" (click)="borrarCombo(c)">✕</button>
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- Categorías -->
+    <section class="panel">
+      <h2>Categorías</h2>
+      <form [formGroup]="formCategoria" (ngSubmit)="crearCategoria()" class="en-linea">
+        <input formControlName="nombre" placeholder="Nueva categoría" aria-label="Nombre de la categoría" />
+        <button type="submit">Agregar</button>
+      </form>
+      <div class="chips">
+        @for (c of categorias(); track c.id) {
+          <span class="chip">
+            {{ c.nombre }}
+            <button class="quitar" (click)="borrarCategoria(c)" [attr.aria-label]="'Borrar ' + c.nombre">✕</button>
+          </span>
+        }
+      </div>
+    </section>
+  </div>
+</div>

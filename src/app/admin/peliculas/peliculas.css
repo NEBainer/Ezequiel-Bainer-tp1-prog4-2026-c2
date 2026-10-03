@@ -1,0 +1,30 @@
+.formulario {
+  margin-bottom: 1.5rem;
+}
+
+.ayuda {
+  font-size: 0.8rem;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mini {
+  width: 48px;
+  --radio: 6px;
+  font-size: 0.4rem;
+}
+
+.mini app-poster {
+  display: block;
+  width: 40px;
+}
+
+.acciones-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: flex-end;
+}

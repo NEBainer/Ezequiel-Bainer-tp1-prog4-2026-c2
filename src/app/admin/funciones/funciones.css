@@ -1,0 +1,72 @@
+.disposicion {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 1.2fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.horarios .chip {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.55rem;
+}
+
+.resultado {
+  border-top: 1px solid var(--borde);
+  padding-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.resultado ul {
+  margin: 0 0 0.5rem;
+  padding-left: 1.2rem;
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.dias {
+  margin-bottom: 1rem;
+}
+
+.salas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.sala {
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  padding: 0.75rem;
+}
+
+.funcion {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 0.85rem;
+}
+
+.funcion .hora {
+  font-weight: 700;
+  color: var(--acento);
+}
+
+.funcion .nombre,
+.funcion .suave {
+  grid-column: 1;
+}
+
+.funcion button {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+}
+
+@media (max-width: 980px) {
+  .disposicion {
+    grid-template-columns: 1fr;
+  }
+}

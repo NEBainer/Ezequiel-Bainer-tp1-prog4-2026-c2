@@ -1,0 +1,149 @@
+<header class="encabezado">
+  <div>
+    <h1>Funciones</h1>
+    <p class="suave">
+      Elegí los días y horarios: el sistema asigna la sala automáticamente, sin que dos funciones se pisen
+      (duración + 30 minutos de limpieza).
+    </p>
+  </div>
+</header>
+
+<div class="disposicion">
+  <form [formGroup]="formulario" (ngSubmit)="programar()" class="panel">
+    <h2>Programar</h2>
+
+    <div class="campo">
+      <label for="pelicula">Película</label>
+      <select id="pelicula" formControlName="pelicula_id">
+        <option [ngValue]="null" disabled>Elegí una película</option>
+        @for (p of peliculas(); track p.id) {
+          <option [ngValue]="p.id">{{ p.nombre }} ({{ p.duracion }} min)</option>
+        }
+      </select>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label>Formato</label>
+        <div class="chips">
+          @for (f of formatos; track f) {
+            <button type="button" class="chip" [class.activo]="formulario.value.formato === f" (click)="formulario.controls.formato.setValue(f)">
+              {{ f }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="campo">
+        <label>Idioma</label>
+        <div class="chips">
+          @for (i of idiomas; track i) {
+            <button type="button" class="chip" [class.activo]="formulario.value.idioma === i" (click)="formulario.controls.idioma.setValue(i)">
+              {{ i }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Días de la semana</label>
+      <div class="chips">
+        @for (d of diasSemana; track d.valor) {
+          <button type="button" class="chip" [class.activo]="formulario.value.dias?.includes(d.valor)" (click)="alternar('dias', d.valor)">
+            {{ d.nombre }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Horarios</label>
+      <div class="chips horarios">
+        @for (h of horarios; track h) {
+          <button type="button" class="chip" [class.activo]="formulario.value.horas?.includes(h)" (click)="alternar('horas', h)">
+            {{ h }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="desde">Desde</label>
+        <select id="desde" formControlName="desde">
+          @for (d of proximosDias; track $index) {
+            <option [ngValue]="$index">{{ $index === 0 ? 'Hoy' : $index === 1 ? 'Mañana' : (d | date: 'EEE d/M') }}</option>
+          }
+        </select>
+      </div>
+      <div class="campo">
+        <label for="semanas">Durante</label>
+        <select id="semanas" formControlName="semanas">
+          @for (s of [1, 2, 3, 4, 6, 8]; track s) {
+            <option [ngValue]="s">{{ s }} {{ s === 1 ? 'semana' : 'semanas' }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <p class="suave">Se van a pedir <strong>{{ armarPedidas().length }}</strong> funciones.</p>
+
+    @if (mensaje()) {
+      <p class="aviso peligro">{{ mensaje() }}</p>
+    }
+
+    <button type="submit" class="btn-primario" [disabled]="guardando()">
+      {{ guardando() ? 'Asignando salas…' : 'Asignar salas y crear' }}
+    </button>
+
+    @if (resultado(); as r) {
+      <div class="resultado">
+        <p class="ok">✔ {{ r.creadas.length }} función(es) creadas.</p>
+        @if (r.creadas.length) {
+          <ul>
+            @for (c of r.creadas; track c.inicio) {
+              <li>{{ c.inicio | date: 'EEE d/M HH:mm' }} → {{ nombreSala(c.sala_id) }}</li>
+            }
+          </ul>
+        }
+        @if (r.sinSala.length) {
+          <p class="error">✖ Sin sala libre en {{ r.sinSala.length }} horario(s):</p>
+          <ul>
+            @for (s of r.sinSala; track s.getTime()) {
+              <li>{{ s | date: 'EEE d/M HH:mm' }}</li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </form>
+
+  <section class="panel">
+    <h2>Grilla del día</h2>
+    <div class="chips dias">
+      @for (d of proximosDias.slice(0, 14); track $index) {
+        <button type="button" class="chip" [class.activo]="esMismoDia(d, diaVista())" (click)="verDia(d)">
+          {{ $index === 0 ? 'Hoy' : (d | date: 'EEE d/M') }}
+        </button>
+      }
+    </div>
+
+    <div class="salas">
+      @for (s of funcionesPorSala(); track s.sala.id) {
+        <div class="sala">
+          <h3>{{ s.sala.nombre }}</h3>
+          @for (f of s.funciones; track f.id) {
+            <div class="funcion">
+              <span class="hora">{{ f.inicio | date: 'HH:mm' }}–{{ f.fin | date: 'HH:mm' }}</span>
+              <span class="nombre">{{ f.peliculas?.nombre }}</span>
+              <span class="suave">{{ f.formato }} · {{ f.idioma }}</span>
+              <button class="btn-chico btn-peligro" (click)="borrar(f)" aria-label="Borrar función">✕</button>
+            </div>
+          } @empty {
+            <p class="suave">Libre</p>
+          }
+        </div>
+      }
+    </div>
+  </section>
+</div>
