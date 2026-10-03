@@ -24,14 +24,25 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"]
+            "styles": [
+              "src/styles.css"
+            ],
+            "allowedCommonJsDependencies": [
+              "qrcode",
+              "html2canvas",
+              "canvg",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "html5-qrcode"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "650kB",
                   "maximumError": "1MB"
                 },
                 {
@@ -40,7 +51,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,
