@@ -16,6 +16,10 @@ const adminRoutes: Routes = [
         loadComponent: () => import('./peliculas/peliculas').then((m) => m.AdminPeliculas),
       },
       {
+        path: 'propuestas',
+        loadComponent: () => import('./propuestas/propuestas').then((m) => m.AdminPropuestas),
+      },
+      {
         path: 'funciones',
         loadComponent: () => import('./funciones/funciones').then((m) => m.AdminFunciones),
       },

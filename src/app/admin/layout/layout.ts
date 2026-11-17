@@ -10,6 +10,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <p class="titulo">Administración</p>
         <a routerLink="reportes" routerLinkActive="activo">📊 Reportes</a>
         <a routerLink="peliculas" routerLinkActive="activo">🎞️ Películas</a>
+        <a routerLink="propuestas" routerLinkActive="activo">💡 Propuestas</a>
         <a routerLink="funciones" routerLinkActive="activo">🕒 Funciones</a>
         <a routerLink="salas" routerLinkActive="activo">🪑 Salas</a>
         <a routerLink="candy" routerLinkActive="activo">🍿 Candy y combos</a>

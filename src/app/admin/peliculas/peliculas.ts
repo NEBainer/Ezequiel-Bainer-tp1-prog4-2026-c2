@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { aLaVenta, esProximamente, PeliculasService } from '../../services/peliculas.service';
 import { StorageService } from '../../services/storage.service';
 import { LogService } from '../../services/log.service';
 import { NotificacionesService } from '../../services/notificaciones.service';
+import { PropuestasService } from '../../services/propuestas.service';
 import { Genero, Pelicula, PeliculaPorCrear } from '../../interfaces/Pelicula';
 import { SelectorFecha } from '../../components/selector-fecha/selector-fecha';
 import { Poster } from '../../components/poster/poster';
@@ -21,6 +22,10 @@ export class AdminPeliculas implements OnInit {
   private storageS = inject(StorageService);
   private logS = inject(LogService);
   private notificacionesS = inject(NotificacionesService);
+  private propuestasS = inject(PropuestasService);
+
+  // ?propuesta=ID en la URL (llega como input gracias a withComponentInputBinding)
+  propuesta = input<string>();
 
   peliculas = signal<Pelicula[]>([]);
   generos = signal<Genero[]>([]);
@@ -45,6 +50,22 @@ export class AdminPeliculas implements OnInit {
   async ngOnInit() {
     await this.cargar();
     this.generos.set(await this.peliculasS.traerGeneros());
+    await this.abrirDesdePropuesta();
+  }
+
+  // Si se llegó desde "Aceptar" una propuesta: alta nueva con título y descripción precargados
+  async abrirDesdePropuesta() {
+    const id = Number(this.propuesta());
+    if (!id) {
+      return;
+    }
+    const p = await this.propuestasS.traerUna(id);
+    if (!p) {
+      return;
+    }
+    this.nueva();
+    this.formulario.patchValue({ nombre: p.titulo, sinopsis: p.descripcion });
+    this.mensaje.set(`Alta desde la propuesta "${p.titulo}": completá el póster, la duración y el resto.`);
   }
 
   async cargar() {

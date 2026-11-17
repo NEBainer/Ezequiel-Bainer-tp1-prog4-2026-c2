@@ -28,6 +28,11 @@ export const routes: Routes = [
     canActivate: [logueadoGuard],
   },
   {
+    path: 'proponer',
+    loadComponent: () => import('./pages/proponer/proponer').then((m) => m.Proponer),
+    canActivate: [logueadoGuard],
+  },
+  {
     path: 'validar',
     loadComponent: () => import('./pages/validar/validar').then((m) => m.Validar),
     canActivate: [rolGuard('empleado', 'admin')],
