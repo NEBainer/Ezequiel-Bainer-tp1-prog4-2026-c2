@@ -26,7 +26,10 @@ Deno.serve(async (req) => {
   const clienteUsuario = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
     global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } },
   });
-  const { data: usuario } = await clienteUsuario.auth.getUser();
+  // El token del usuario viene en el header Authorization; se le pasa explícitamente a getUser.
+  // getUser le pregunta a Auth si la sesión de ese token sigue abierta (si se cerró, usuario.user es null).
+  const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
+  const { data: usuario } = await clienteUsuario.auth.getUser(token);
   if (usuario.user?.app_metadata?.rol !== 'admin') {
     return responder({ error: 'Solo el admin puede enviar avisos' }, 403);
   }

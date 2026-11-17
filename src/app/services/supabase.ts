@@ -10,15 +10,15 @@ export class SupabaseService {
     this.sup = createClient(environment.SUPABASE_URL, environment.SUPABASE_KEY);
   }
 
-  public get Sup() {
+  public get Sup() {              //Base de datos, Realtime, Edge Functions
     return this.sup;
   }
 
-  public get Auth() {
+  public get Auth() {            // login / registro
     return this.sup.auth;
   }
 
-  public get Stg() {
-    return this.sup.storage;
+  public get Stg() {             // archivos
+    return this.sup.storage;     
   }
 }
