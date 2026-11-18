@@ -103,3 +103,17 @@ Registro de las decisiones de diseño e implementación del proyecto. Cada decis
 ### D-14 — Estado y comunicación entre componentes
 - **Decisión y fundamento:** servicios con `@Service()` e `inject()`, un único `SupabaseService`. El estado que cambia de forma asincrónica está en signals y los valores derivados (filtros del buscador, detalle de precio, ranking de reportes) en `computed`. Los componentes reutilizables (mapa de butacas, póster, estrellas, entrada, selector de fecha) reciben datos con `input()` y avisan con `output()`; no consultan la base.
 - **Interceptors:** `supabase-js` usa `fetch` y no `HttpClient`, por lo que un interceptor de Angular no intercepta sus pedidos; no se usa.
+
+### D-15 — Una propuesta pendiente por cliente
+- **Requerimientos relacionados:** R-43
+- **Problema:** cada cliente puede tener una sola propuesta en revisión, pero debe poder proponer otra cuando la anterior se resuelve.
+- **Alternativas consideradas:** controlarlo solo en Angular (ocultando el formulario); `UNIQUE (usuario_id)` común, que permitiría una sola propuesta en toda la vida del cliente.
+- **Decisión y fundamento:** índice único parcial `UNIQUE (usuario_id) WHERE estado = 'pendiente'`. La restricción solo compara las filas pendientes, así que las aceptadas y rechazadas no cuentan. La regla queda en la base: no se puede saltear con dos pestañas ni llamando a la API directamente. El formulario oculto en la pantalla es solo experiencia de usuario. Por RLS, el cliente solo inserta propuestas propias y en estado pendiente, y solo el admin cambia el estado.
+- **Ubicación en el código:** `supabase/05_propuestas.sql`, `src/app/pages/proponer/proponer.ts`.
+
+### D-16 — Aceptar una propuesta abre el alta precargada
+- **Requerimientos relacionados:** R-44
+- **Problema:** al aceptar, el admin debe llegar a la pantalla de crear película con los datos de la propuesta.
+- **Alternativas consideradas:** marcar la propuesta como aceptada recién al guardar la película.
+- **Decisión y fundamento:** se marca como aceptada al tocar "Aceptar" y se navega a `/admin/peliculas?propuesta=ID`. Solo viaja el id: la pantalla lo recibe como `input()` (con `withComponentInputBinding`), lee la propuesta de la base y precarga nombre y sinopsis con `patchValue`. Es lo que pide el cliente y evita vincular las dos tablas. Limitación: si el admin no guarda la película, la propuesta queda aceptada igual. La aceptación y el rechazo quedan en el registro de actividad.
+- **Ubicación en el código:** `src/app/admin/propuestas/propuestas.ts`, `src/app/admin/peliculas/peliculas.ts` (`abrirDesdePropuesta`).

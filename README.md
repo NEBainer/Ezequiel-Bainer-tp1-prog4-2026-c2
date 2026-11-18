@@ -19,9 +19,9 @@ También se puede comprar sin cuenta (compra anónima).
 - **Cartelera:** las 3 películas más vendidas primero, buscador por nombre y filtro por uno o más géneros, puntuación promedio. Sección "Próximamente" con alerta por notificación push.
 - **Película:** ficha con géneros, duración, edad mínima, reseñas (estrellas + comentario) y funciones por día.
 - **Compra:** elección registrado / anónimo → mapa de butacas en tiempo real (común, accesible, VIP) → candy y combos destacados, canje de puntos → pago simulado con crédito de cuenta → entrada con QR y PDF.
-- **Perfil:** puntos, crédito, historial de canjes, entradas próximas con cancelación (hasta 2 h antes, devuelve crédito) y compras anteriores. **Mis películas:** historial visual con la calificación propia.
+- **Perfil:** puntos, crédito, historial de canjes, entradas próximas con cancelación (hasta 2 h antes, devuelve crédito) y compras anteriores. **Mis películas:** historial visual con la calificación propia. **Proponer:** el cliente sugiere una película que no está en cartelera (una pendiente a la vez).
 - **Empleados:** validación de entradas y candy por cámara o código manual; cada parte del QR se usa una sola vez.
-- **Admin:** películas (póster en Storage, géneros, edad, preventa, visibilidad, aviso push), funciones con asignación automática de sala, salas, candy, combos, precios y cupones, reportes de facturación (PDF y Excel) con gráficos, y registro de actividad.
+- **Admin:** películas (póster en Storage, géneros, edad, preventa, visibilidad, aviso push), funciones con asignación automática de sala, salas, candy, combos, precios y cupones, reportes de facturación (PDF y Excel) con gráficos, registro de actividad y propuestas de clientes (al aceptar, abre el alta de película precargada).
 
 ## Stack
 - Angular 22 (componentes standalone, signals, `computed`, lazy loading, guards funcionales, formularios reactivos, pipes y directivas propias)
@@ -30,8 +30,8 @@ También se puede comprar sin cuenta (compra anónima).
 - Deploy en Vercel
 
 ## Requerimientos y decisiones
-- [`docs/requerimientos.md`](docs/requerimientos.md): requerimientos R-01 a R-42 y criterios adoptados.
-- [`docs/decisiones.md`](docs/decisiones.md): decisiones técnicas D-01 a D-14 con alternativas y ubicación en el código.
+- [`docs/requerimientos.md`](docs/requerimientos.md): requerimientos R-01 a R-44 y criterios adoptados.
+- [`docs/decisiones.md`](docs/decisiones.md): decisiones técnicas D-01 a D-16 con alternativas y ubicación en el código.
 
 ## Arquitectura
 
@@ -40,9 +40,9 @@ También se puede comprar sin cuenta (compra anónima).
 src/app/
   admin/            Panel de administración (rutas hijas con layout propio, carga diferida)
     layout/         Menú lateral + router-outlet
-    peliculas/  funciones/  salas/  candy/  precios/  reportes/  log/
+    peliculas/  propuestas/  funciones/  salas/  candy/  precios/  reportes/  log/
   auth/             Login y registro (auth.routes.ts)
-  pages/            home, pelicula, compra, perfil, mis-peliculas, validar
+  pages/            home, pelicula, compra, perfil, mis-peliculas, proponer, validar
   components/       Reutilizables: mapa-butacas, poster, estrellas, selector-fecha,
                     tarjeta-pelicula, entrada-ticket
   services/         Un servicio por área + lógica de negocio pura
@@ -67,6 +67,7 @@ supabase/           Scripts SQL (modelo, RLS, datos iniciales) y Edge Function
 | `ComprobanteService` | QR, PDF de la entrada, PDF y CSV de reportes |
 | `NotificacionesService` | Suscripción push, alertas y llamada a la Edge Function |
 | `LogService` | Registro de actividad |
+| `PropuestasService` | Propuestas de películas de los clientes |
 
 ### Rutas
 Todas las páginas se cargan de forma diferida (`loadComponent` / `loadChildren`).
@@ -75,7 +76,7 @@ Todas las páginas se cargan de forma diferida (`loadComponent` / `loadChildren`
 |---|---|
 | `/`, `/pelicula/:id`, `/comprar/:funcionId` | Público (la compra permite anónimos) |
 | `/auth/login`, `/auth/registro` | Sin sesión (`noLogueadoGuard`) |
-| `/perfil`, `/mis-peliculas` | Con sesión (`logueadoGuard`) |
+| `/perfil`, `/mis-peliculas`, `/proponer` | Con sesión (`logueadoGuard`) |
 | `/validar` | `rolGuard('empleado', 'admin')` |
 | `/admin/**` | `rolGuard('admin')` |
 
@@ -103,6 +104,7 @@ Todas las páginas se cargan de forma diferida (`loadComponent` / `loadChildren`
 | `resenas` | Estrellas y comentario, una por usuario y película |
 | `alertas`, `suscripciones_push` | Alertas de "Próximamente" y suscripciones push |
 | `log_actividad` | Quién hizo qué y cuándo |
+| `propuestas` | Propuestas de clientes; índice único parcial: una pendiente por usuario |
 
 **RLS:** el rol se lee del JWT (`app_metadata.rol`). Catálogo: lectura pública, escritura del admin. Compras, canjes y alertas: cada usuario las suyas; empleados y admin leen y validan compras. Butacas ocupadas: lectura pública (sin datos personales). Storage: bucket público `imagenes`, solo el admin sube. Los scripts están en `supabase/`.
 

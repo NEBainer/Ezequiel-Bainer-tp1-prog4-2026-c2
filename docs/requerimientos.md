@@ -90,6 +90,12 @@ Documento que resume los requerimientos del sistema, extraídos del intercambio 
 | R-41 | Admin: **gráfico** de películas **más vistas por semana y por mes**, y **producto del candy bar más vendido**. |
 | R-42 | **Log de actividad** en el admin: quién creó qué función, quién modificó un precio, quién validó un QR. Todo con **fecha y hora**. |
 
+### Mail 11 — 10/03/2020 (propuestas de películas)
+| ID | Pedido |
+|---|---|
+| R-43 | **Propuestas de películas**: el cliente propone una película que no está en cartelera, con **título, descripción y por qué** la quiere. **Una propuesta a la vez** por cliente. |
+| R-44 | El admin **ve las propuestas** y las **acepta o rechaza**. Al aceptar, lo lleva a la **pantalla de crear película con los datos precargados**. |
+
 ---
 
 ## 2. Requisitos de la entrega
@@ -212,7 +218,12 @@ Antes de pagar se muestra el detalle completo, con las butacas VIP identificadas
 ### 4.9 Administración: reportes, gráficos y registro de actividad
 - Reporte de facturación por día y entradas vendidas, para los últimos 7, 30 o 90 días, exportable a PDF y a Excel (archivo CSV).
 - Gráfico de películas más vistas (entradas vendidas) de la última semana o del último mes, y ranking de productos de candy más vendidos.
-- Registro de actividad con fecha, hora y usuario: creación de funciones y películas, cambios de precios, cupones y productos, validación de entradas, entrega de candy y avisos enviados.
+- Registro de actividad con fecha, hora y usuario: creación de funciones y películas, cambios de precios, cupones y productos, validación de entradas, entrega de candy, avisos enviados y propuestas aceptadas o rechazadas.
+
+### 4.9.1 Propuestas de películas
+- Proponer requiere estar registrado (`/proponer`). La propuesta tiene título, descripción y motivo, y nace en estado "pendiente".
+- "Una propuesta a la vez" significa **una pendiente por cliente**: cuando el admin la acepta o la rechaza, el cliente puede enviar otra. El cliente ve el estado de todas sus propuestas.
+- Al aceptar, la propuesta queda marcada como aceptada y se abre el alta de película con el nombre y la sinopsis precargados; el admin completa el resto (póster, duración, géneros, etc.).
 
 ### 4.10 Experiencia de usuario y estilo visual
 - Identidad propia "Fotograma": paleta oscura de sala con acento ámbar, tipografías Bricolage Grotesque y DM Sans, logo propio.
