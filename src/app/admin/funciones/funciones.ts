@@ -72,6 +72,8 @@ export class AdminFunciones implements OnInit {
   funcionesDelDia = signal<Funcion[]>([]);
   // Cuánta gente hay en lista de espera por función (R-47): id de función -> cantidad
   enEspera = signal<Map<number, number>>(new Map());
+  aCancelar = signal<number | null>(null); // función que pide confirmación para cancelarse
+  cancelando = signal(false);
 
   funcionesPorSala = computed(() =>
     this.salas().map((sala) => ({
@@ -199,6 +201,24 @@ export class AdminFunciones implements OnInit {
       'Borró una función',
       `${f.peliculas?.nombre} · ${new Date(f.inicio).toLocaleString('es-AR')} · ${this.nombreSala(f.sala_id)}`,
     );
+    await this.verDia(this.diaVista());
+  }
+
+  // Cancelación por el cine (R-48): todo lo atómico lo hace la base (ver funcionesS.cancelar)
+  async cancelar(f: Funcion) {
+    this.cancelando.set(true);
+    const { error, compras, avisos } = await this.funcionesS.cancelar(f.id);
+    this.cancelando.set(false);
+    this.aCancelar.set(null);
+    if (error) {
+      this.mensaje.set(`No se pudo cancelar la función: ${error}. No se modificó nada.`);
+      return;
+    }
+    await this.logS.registrar(
+      'Canceló una función',
+      `${f.peliculas?.nombre} · ${new Date(f.inicio).toLocaleString('es-AR')} · ${this.nombreSala(f.sala_id)} · ${compras} compra(s) pasadas a crédito`,
+    );
+    this.mensaje.set(`Función cancelada: ${compras} compra(s) pasaron a crédito y se enviaron ${avisos} aviso(s).`);
     await this.verDia(this.diaVista());
   }
 

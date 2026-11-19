@@ -51,7 +51,8 @@ create policy "entradas: crear si no hay turno ajeno" on public.entradas for ins
 -- Cron: cada minuto llama a la Edge Function, que cierra los turnos vencidos y avisa al siguiente.
 -- pg_cron ya viene instalado; pg_net permite hacer el pedido HTTP desde la base.
 -- =========================================================
-create extension if not exists pg_net;
+-- En el schema "extensions" (no en public), como recomienda Supabase. Sus funciones quedan en "net".
+create extension if not exists pg_net with schema extensions;
 
 select cron.schedule(
   'lista-espera',

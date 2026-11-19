@@ -3,6 +3,12 @@
     <p class="suave">Preparando la sala…</p>
   } @else if (!funcion() || !pelicula()) {
     <p class="vacio">Esa función no existe. <a routerLink="/">Volver a la cartelera</a></p>
+  } @else if (funcion()!.cancelada && paso() !== 'listo') {
+    <!-- R-48: el cine suspendió la función (la RLS de "entradas" igual impide comprar) -->
+    <p class="vacio">
+      Esta función fue cancelada por el cine.
+      <a [routerLink]="['/pelicula', funcion()!.pelicula_id]">Ver otras funciones de {{ pelicula()?.nombre }}</a>
+    </p>
   } @else {
     @let f = funcion()!;
     @let p = pelicula()!;

@@ -133,14 +133,29 @@
         <div class="sala">
           <h3>{{ s.sala.nombre }}</h3>
           @for (f of s.funciones; track f.id) {
-            <div class="funcion">
+            <div class="funcion" [class.cancelada]="f.cancelada">
               <span class="hora">{{ f.inicio | date: 'HH:mm' }}–{{ f.fin | date: 'HH:mm' }}</span>
               <span class="nombre">{{ f.peliculas?.nombre }}</span>
               <span class="suave">{{ f.formato }} · {{ f.idioma }}</span>
-              @if (enEspera().get(f.id); as cantidad) {
-                <span class="en-espera">⏳ {{ cantidad }} en espera</span>
+              @if (f.cancelada) {
+                <span class="etiqueta-cancelada">Cancelada por el cine</span>
+              } @else {
+                @if (enEspera().get(f.id); as cantidad) {
+                  <span class="en-espera">⏳ {{ cantidad }} en espera</span>
+                }
+                <div class="acciones">
+                  @if (aCancelar() === f.id) {
+                    <!-- Confirmación en la misma pantalla (sin alert): la cancelación no se puede deshacer -->
+                    <button class="btn-chico btn-peligro" (click)="cancelar(f)" [disabled]="cancelando()">
+                      Sí, cancelar
+                    </button>
+                    <button class="btn-chico" (click)="aCancelar.set(null)">No</button>
+                  } @else {
+                    <button class="btn-chico" (click)="aCancelar.set(f.id)">Cancelar</button>
+                    <button class="btn-chico btn-peligro" (click)="borrar(f)" aria-label="Borrar función">✕</button>
+                  }
+                </div>
               }
-              <button class="btn-chico btn-peligro" (click)="borrar(f)" aria-label="Borrar función">✕</button>
             </div>
           } @empty {
             <p class="suave">Libre</p>

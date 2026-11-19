@@ -16,11 +16,13 @@ export interface Funcion {
   fin: string; // inicio + duración
   formato: Formato;
   idioma: Idioma;
+  cancelada: boolean; // la suspendió el cine (R-48): ver supabase/08_cancelar_funcion.sql
   peliculas?: Pelicula;
   salas?: Sala;
 }
 
-export type FuncionPorCrear = Omit<Funcion, 'id' | 'peliculas' | 'salas'>;
+// "cancelada" no se manda al crear: la base pone false por defecto
+export type FuncionPorCrear = Omit<Funcion, 'id' | 'cancelada' | 'peliculas' | 'salas'>;
 
 // Lo que se arma en el formulario de programación antes de asignar sala
 export interface FuncionPedida {

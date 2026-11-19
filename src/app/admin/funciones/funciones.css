@@ -59,10 +59,12 @@
   grid-column: 1;
 }
 
-.funcion button {
+.funcion .acciones {
   grid-column: 2;
   grid-row: 1 / span 3;
   align-self: center;
+  display: flex;
+  gap: 0.3rem;
 }
 
 @media (max-width: 980px) {
@@ -75,4 +77,15 @@
 .en-espera {
   font-size: 0.8rem;
   color: var(--acento);
+}
+
+/* Función cancelada por el cine: tachada y con etiqueta */
+.funcion.cancelada .hora,
+.funcion.cancelada .nombre {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.etiqueta-cancelada {
+  font-size: 0.8rem;
+  color: var(--peligro);
 }

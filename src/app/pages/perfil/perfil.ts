@@ -42,6 +42,13 @@ export class Perfil implements OnInit {
 
   historial = computed(() => this.compras().filter((c) => !this.proximas().includes(c)));
 
+  // Compras de funciones que suspendió el cine y que todavía no pasaron: se ofrece reubicarse (R-49)
+  canceladasPorElCine = computed(() =>
+    this.compras().filter(
+      (c) => c.estado === 'cancelada' && c.funciones?.cancelada && new Date(c.funciones.inicio).getTime() > Date.now(),
+    ),
+  );
+
   async ngOnInit() {
     await this.cargar();
   }

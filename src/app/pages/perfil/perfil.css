@@ -72,3 +72,13 @@ dd {
   flex-wrap: wrap;
   margin-bottom: 0.5rem;
 }
+
+/* Aviso de función cancelada por el cine, con el botón para reubicarse */
+.cancelada-cine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}

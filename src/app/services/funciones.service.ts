@@ -50,11 +50,12 @@ export class FuncionesService {
     return cantidades;
   }
 
-  // Funciones que todavía no empezaron, de una película
+  // Funciones que todavía no empezaron, de una película (sin las que canceló el cine)
   async traerProximasDePelicula(peliculaId: number) {
     const { data } = await this.supS.Sup.from('funciones')
       .select('*, salas(*)')
       .eq('pelicula_id', peliculaId)
+      .eq('cancelada', false)
       .gt('inicio', new Date().toISOString())
       .order('inicio');
     return (data ?? []) as Funcion[];
@@ -86,6 +87,23 @@ export class FuncionesService {
   async borrar(id: number) {
     const { error } = await this.supS.Sup.from('funciones').delete().eq('id', id);
     return { error };
+  }
+
+  /**
+   * Cancelación de una función por el cine (R-48, R-50).
+   * 1) rpc: la función SQL cancelar_funcion hace todo en UNA transacción (acreditar a cada
+   *    comprador, liberar butacas, descartar la lista de espera y marcar la función).
+   *    Si algo falla, la base deshace todo: se acredita a todos o a nadie.
+   * 2) Recién si salió bien, la Edge Function manda los push. Va afuera de la transacción
+   *    porque es un servicio externo: si un aviso falla, el crédito igual quedó acreditado.
+   */
+  async cancelar(id: number) {
+    const { data, error } = await this.supS.Sup.rpc('cancelar_funcion', { p_funcion_id: id });
+    if (error) {
+      return { error: error.message, compras: 0, avisos: 0 };
+    }
+    const aviso = await this.supS.Sup.functions.invoke('notificar-cancelacion', { body: { funcion_id: id } });
+    return { error: null, compras: data as number, avisos: (aviso.data?.enviadas as number) ?? 0 };
   }
 
   /**

@@ -45,6 +45,18 @@
       <p class="aviso" role="status">{{ mensaje() }}</p>
     }
 
+    <!-- Funciones que canceló el cine (R-49): se ofrece reubicarse usando el crédito -->
+    @for (c of canceladasPorElCine(); track c.id) {
+      <div class="aviso cancelada-cine" role="status">
+        <div>
+          <strong>Tu función fue cancelada.</strong>
+          {{ c.peliculas?.nombre }} · {{ c.funciones?.inicio | date: 'EEEE d/M · HH:mm' }} h.
+          Te acreditamos {{ c.credito_otorgado | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}, que podés usar al pagar.
+        </div>
+        <a class="btn btn-primario btn-chico" [routerLink]="['/pelicula', c.pelicula_id]">Elegir otra función</a>
+      </div>
+    }
+
     <!-- Próximas funciones -->
     <section>
       <h2>Tus entradas</h2>
@@ -161,7 +173,9 @@
                   <td>{{ c.peliculas?.nombre }}</td>
                   <td>{{ c.total | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
                   <td>{{ c.estado === 'activa' ? '+' + c.puntos_ganados : '—' }}</td>
-                  <td>{{ c.estado === 'cancelada' ? 'Cancelada (crédito)' : 'Vista' }}</td>
+                  <td>
+                    {{ c.estado === 'cancelada' ? (c.funciones?.cancelada ? 'Cancelada por el cine (crédito)' : 'Cancelada (crédito)') : 'Vista' }}
+                  </td>
                 </tr>
               }
             </tbody>
