@@ -12,7 +12,7 @@
         @if (authS.rol() === 'empleado' || authS.rol() === 'admin') {
           <a routerLink="/validar" routerLinkActive="activo">Validar QR</a>
         }
-        @if (authS.rol() === 'admin') {
+        @if (authS.puedeVer()) {
           <a routerLink="/admin" routerLinkActive="activo">Admin</a>
         }
         <a routerLink="/mis-peliculas" routerLinkActive="activo">Mis películas</a>

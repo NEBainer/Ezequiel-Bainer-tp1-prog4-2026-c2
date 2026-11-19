@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { noLogueadoGuard } from './guards/no-logueado-guard';
 import { logueadoGuard } from './guards/logueado-guard';
 import { rolGuard } from './guards/rol-guard';
+import { seccionGuard } from './guards/seccion-guard';
 
 export const routes: Routes = [
   {
@@ -40,7 +41,8 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./admin/admin.routes'),
-    canActivate: [rolGuard('admin')],
+    // Entra el admin o quien tenga algún rol configurable (cada sección tiene su propio guard)
+    canActivate: [seccionGuard()],
   },
   {
     path: 'auth',

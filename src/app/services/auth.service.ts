@@ -2,12 +2,15 @@ import { inject, Service, signal, WritableSignal } from '@angular/core';
 import { User } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase';
 import { DbService } from './db.service';
+import { RolesService } from './roles.service';
 import { Credenciales, Rol, Usuario } from '../interfaces/Usuario';
+import { Seccion } from '../interfaces/RolPersonalizado';
 
 @Service()
 export class Auth {
   private supabaseS = inject(SupabaseService);
   private dbS = inject(DbService);
+  private rolesS = inject(RolesService);
 
   public usuarioActual: WritableSignal<User | null> = signal<User | null>(null);
 
@@ -23,10 +26,22 @@ export class Auth {
       if (session?.user) {
         // setTimeout: Supabase recomienda no esperar otras llamadas dentro de este callback
         setTimeout(() => this.cargarPerfil(), 0);
+        setTimeout(() => this.rolesS.cargarMisSecciones(session.user.id), 0);
       } else {
         this.perfil.set(null);
+        this.rolesS.misSecciones.set([]);
       }
     });
+  }
+
+  // ¿Puede ver esta sección del panel? Sin argumento: ¿puede entrar al panel?
+  // El admin ve todo; el resto, lo que le habiliten sus roles configurables. Solo UI (la seguridad es RLS).
+  public puedeVer(seccion?: Seccion): boolean {
+    if (this.rol() === 'admin') {
+      return true;
+    }
+    const secciones = this.rolesS.misSecciones();
+    return seccion ? secciones.includes(seccion) : secciones.length > 0;
   }
 
   // Se puede pasar el id cuando el signal todavía no se cargó (al recargar la página)

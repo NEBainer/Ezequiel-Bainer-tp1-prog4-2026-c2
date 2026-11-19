@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Auth } from '../../services/auth.service';
+import { SECCIONES } from '../../interfaces/RolPersonalizado';
 
 @Component({
   selector: 'app-admin-layout',
@@ -8,14 +10,15 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <div class="contenedor admin">
       <nav class="menu" aria-label="Administración">
         <p class="titulo">Administración</p>
-        <a routerLink="reportes" routerLinkActive="activo">📊 Reportes</a>
-        <a routerLink="peliculas" routerLinkActive="activo">🎞️ Películas</a>
-        <a routerLink="propuestas" routerLinkActive="activo">💡 Propuestas</a>
-        <a routerLink="funciones" routerLinkActive="activo">🕒 Funciones</a>
-        <a routerLink="salas" routerLinkActive="activo">🪑 Salas</a>
-        <a routerLink="candy" routerLinkActive="activo">🍿 Candy y combos</a>
-        <a routerLink="precios" routerLinkActive="activo">🏷️ Precios y cupones</a>
-        <a routerLink="log" routerLinkActive="activo">📜 Actividad</a>
+        <!-- Solo las secciones que el usuario puede ver (el admin, todas) -->
+        @for (s of secciones; track s.seccion) {
+          @if (authS.puedeVer(s.seccion)) {
+            <a [routerLink]="s.seccion" routerLinkActive="activo">{{ s.titulo }}</a>
+          }
+        }
+        @if (authS.rol() === 'admin') {
+          <a routerLink="roles" routerLinkActive="activo">🔑 Roles</a>
+        }
       </nav>
       <section class="contenido">
         <router-outlet />
@@ -74,4 +77,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     }
   `,
 })
-export class AdminLayout {}
+export class AdminLayout {
+  authS = inject(Auth);
+  secciones = SECCIONES;
+}
