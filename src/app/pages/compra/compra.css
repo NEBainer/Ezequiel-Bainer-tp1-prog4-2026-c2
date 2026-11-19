@@ -236,3 +236,16 @@
     position: static;
   }
 }
+
+/* Lista de espera: aviso de función agotada con el botón para anotarse */
+.espera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.espera h2 {
+  margin: 0;
+}

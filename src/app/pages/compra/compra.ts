@@ -24,6 +24,10 @@ import { Compra as CompraDatos, CompraItemPorCrear, CanjePorCrear, EntradaPorCre
 import { MapaButacas } from '../../components/mapa-butacas/mapa-butacas';
 import { EntradaTicket } from '../../components/entrada-ticket/entrada-ticket';
 import { DuracionPipe } from '../../pipes/duracion-pipe';
+import { ListaEsperaService } from '../../services/lista-espera.service';
+import { NotificacionesService } from '../../services/notificaciones.service';
+import { TOTAL_BUTACAS } from '../../services/plano-sala';
+import { ListaEspera, turnoVigente, venceTurno } from '../../interfaces/ListaEspera';
 
 type Paso = 'modo' | 'butacas' | 'candy' | 'pago' | 'listo';
 
@@ -54,6 +58,8 @@ export class Compra implements OnInit, OnDestroy {
   private configS = inject(ConfigService);
   private candyS = inject(CandyService);
   private calculadora = inject(CalculadoraPrecio);
+  private listaEsperaS = inject(ListaEsperaService);
+  private notificacionesS = inject(NotificacionesService);
 
   // Parámetro :funcionId de la ruta
   funcionId = input.required<string>();
@@ -151,9 +157,42 @@ export class Compra implements OnInit, OnDestroy {
 
   butacasVip = computed(() => this.seleccionadas().filter((b) => b.tipo === 'vip'));
 
+  // ---------- Lista de espera (R-46) ----------
+  espera = signal<ListaEspera[]>([]);
+  agotada = computed(() => this.ocupadas().size >= TOTAL_BUTACAS);
+  // Mi fila en la lista de esta función (si estoy anotado)
+  miEspera = computed(() => this.espera().find((e) => e.usuario_id === this.authS.usuarioActual()?.id) ?? null);
+  // Turno vigente de OTRA persona: mientras dure, la RLS de "entradas" no deja comprar a nadie más
+  turnoAjeno = computed(
+    () => this.espera().find((e) => turnoVigente(e) && e.usuario_id !== this.authS.usuarioActual()?.id) ?? null,
+  );
+  venceTurno = venceTurno;
+  turnoVigente = turnoVigente;
+
+  async anotarseEnEspera() {
+    const usuario = this.authS.usuarioActual();
+    const funcion = this.funcion();
+    if (!usuario || !funcion) {
+      return;
+    }
+    // Primero el permiso de notificaciones: sin push no le puede llegar el aviso del turno
+    const suscripcion = await this.notificacionesS.suscribir(usuario.id);
+    if (suscripcion.error) {
+      this.error.set(suscripcion.error);
+      return;
+    }
+    const { error } = await this.listaEsperaS.anotarse({ funcion_id: funcion.id, usuario_id: usuario.id });
+    if (error) {
+      this.error.set(error);
+      return;
+    }
+    this.error.set(null);
+    this.espera.set(await this.listaEsperaS.traerDeFuncion(funcion.id));
+  }
+
   async ngOnInit() {
     const id = Number(this.funcionId());
-    const [funcion, config, cupones, categorias, productos, combos, ocupadas] = await Promise.all([
+    const [funcion, config, cupones, categorias, productos, combos, ocupadas, espera] = await Promise.all([
       this.funcionesS.traerUna(id),
       this.configS.traer(),
       this.configS.traerCupones(),
@@ -161,7 +200,9 @@ export class Compra implements OnInit, OnDestroy {
       this.candyS.traerProductos(),
       this.candyS.traerCombos(),
       this.comprasS.traerOcupadas(id),
+      this.listaEsperaS.traerDeFuncion(id),
     ]);
+    this.espera.set(espera);
 
     this.funcion.set(funcion);
     this.config.set(config);
@@ -213,9 +254,14 @@ export class Compra implements OnInit, OnDestroy {
     }
   }
 
+  // También se recarga la lista de espera: si se liberaron butacas, puede haber un turno nuevo
   private async recargarOcupadas(funcionId: number) {
-    const ocupadas = await this.comprasS.traerOcupadas(funcionId);
+    const [ocupadas, espera] = await Promise.all([
+      this.comprasS.traerOcupadas(funcionId),
+      this.listaEsperaS.traerDeFuncion(funcionId),
+    ]);
     this.ocupadas.set(new Set(ocupadas.map(claveButaca)));
+    this.espera.set(espera);
   }
 
   private elegidos<T extends { id: number }>(lista: T[], cantidades: Record<number, number>): Cantidad<T>[] {

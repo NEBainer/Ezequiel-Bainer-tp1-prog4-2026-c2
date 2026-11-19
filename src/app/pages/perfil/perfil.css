@@ -62,3 +62,13 @@ dd {
     grid-column: 1 / -1;
   }
 }
+
+/* Listas de espera */
+.espera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}

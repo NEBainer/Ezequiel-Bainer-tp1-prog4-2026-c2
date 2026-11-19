@@ -30,6 +30,42 @@
       <p class="aviso peligro" role="alert">{{ error() }}</p>
     }
 
+    <!-- ===================== Lista de espera (R-46) ===================== -->
+    @if (paso() !== 'listo') {
+      @let mia = miEspera();
+      @if (mia && turnoVigente(mia)) {
+        <p class="aviso" role="status">
+          🎟️ <strong>¡Es tu turno!</strong> Se liberaron lugares: tenés hasta las
+          {{ venceTurno(mia) | date: "HH:mm" }} para comprar.
+        </p>
+      } @else if (turnoAjeno(); as turno) {
+        <p class="aviso" role="status">
+          Hay lugares reservados para alguien de la lista de espera hasta las {{ venceTurno(turno) | date: "HH:mm" }}.
+        </p>
+      } @else if (agotada()) {
+        <section class="panel espera">
+          <div>
+            <h2>Función agotada</h2>
+            @if (mia) {
+              <p class="suave">Estás en la lista de espera. Si se libera un lugar te avisamos por notificación.</p>
+            } @else {
+              <p class="suave">
+                Anotate en la lista de espera: si alguien cancela, te avisamos por notificación y tenés 15 minutos para
+                comprar. {{ espera().length }} persona(s) esperando.
+              </p>
+            }
+          </div>
+          @if (!mia) {
+            @if (authS.usuarioActual()) {
+              <button class="btn-primario" (click)="anotarseEnEspera()">Anotarme en la lista de espera</button>
+            } @else {
+              <button class="btn-primario" (click)="irALogin()">Ingresar para anotarme</button>
+            }
+          }
+        </section>
+      }
+    }
+
     <!-- ===================== PASO 1: registrado o anónimo ===================== -->
     @if (paso() === 'modo') {
       <section class="opciones">

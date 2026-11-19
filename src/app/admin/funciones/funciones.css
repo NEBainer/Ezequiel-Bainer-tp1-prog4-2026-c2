@@ -70,3 +70,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Cantidad de gente en lista de espera para esa función */
+.en-espera {
+  font-size: 0.8rem;
+  color: var(--acento);
+}

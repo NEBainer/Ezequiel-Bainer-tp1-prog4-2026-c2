@@ -67,10 +67,14 @@ export class ComprasService {
     const resEntradas = await this.supS.Sup.from('entradas').insert(entradas);
     if (resEntradas.error) {
       const ocupada = resEntradas.error.code === '23505'; // violación de UNIQUE
+      // 42501 = lo rechazó la RLS: hay un turno de lista de espera vigente de otra persona
+      const reservada = resEntradas.error.code === '42501';
       return {
         error: ocupada
           ? 'Alguien acaba de comprar una de las butacas que elegiste. Elegí otras.'
-          : 'No se pudieron reservar las butacas.',
+          : reservada
+            ? 'Los lugares libres están reservados para alguien de la lista de espera. Probá de nuevo en unos minutos.'
+            : 'No se pudieron reservar las butacas.',
       };
     }
 

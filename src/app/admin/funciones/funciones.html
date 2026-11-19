@@ -137,6 +137,9 @@
               <span class="hora">{{ f.inicio | date: 'HH:mm' }}–{{ f.fin | date: 'HH:mm' }}</span>
               <span class="nombre">{{ f.peliculas?.nombre }}</span>
               <span class="suave">{{ f.formato }} · {{ f.idioma }}</span>
+              @if (enEspera().get(f.id); as cantidad) {
+                <span class="en-espera">⏳ {{ cantidad }} en espera</span>
+              }
               <button class="btn-chico btn-peligro" (click)="borrar(f)" aria-label="Borrar función">✕</button>
             </div>
           } @empty {

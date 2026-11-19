@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { PeliculasService } from '../../services/peliculas.service';
 import { FuncionesService } from '../../services/funciones.service';
 import { LogService } from '../../services/log.service';
+import { ListaEsperaService } from '../../services/lista-espera.service';
 import { Pelicula } from '../../interfaces/Pelicula';
 import { Formato, Funcion, FuncionPedida, Idioma, ResultadoAsignacion, Sala } from '../../interfaces/Funcion';
 
@@ -37,6 +38,7 @@ export class AdminFunciones implements OnInit {
   private peliculasS = inject(PeliculasService);
   private funcionesS = inject(FuncionesService);
   private logS = inject(LogService);
+  private listaEsperaS = inject(ListaEsperaService);
 
   diasSemana = DIAS_SEMANA;
   horarios = HORARIOS;
@@ -68,6 +70,8 @@ export class AdminFunciones implements OnInit {
   // Vista de un día
   diaVista = signal<Date>(this.proximosDias[0]);
   funcionesDelDia = signal<Funcion[]>([]);
+  // Cuánta gente hay en lista de espera por función (R-47): id de función -> cantidad
+  enEspera = signal<Map<number, number>>(new Map());
 
   funcionesPorSala = computed(() =>
     this.salas().map((sala) => ({
@@ -176,9 +180,13 @@ export class AdminFunciones implements OnInit {
   async verDia(dia: Date) {
     this.diaVista.set(dia);
     const fin = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate() + 1);
-    const funciones = await this.funcionesS.traerEntre(dia, fin);
+    const [funciones, enEspera] = await Promise.all([
+      this.funcionesS.traerEntre(dia, fin),
+      this.listaEsperaS.cantidadPorFuncion(),
+    ]);
     // Solo las que empiezan ese día
     this.funcionesDelDia.set(funciones.filter((f) => new Date(f.inicio) >= dia));
+    this.enEspera.set(enEspera);
   }
 
   async borrar(f: Funcion) {

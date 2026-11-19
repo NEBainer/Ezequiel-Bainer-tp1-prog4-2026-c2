@@ -70,6 +70,46 @@
       }
     </section>
 
+    <!-- Listas de espera (R-47): en cuáles está y en qué posición -->
+    @if (esperas().length) {
+      <section>
+        <h2>Listas de espera</h2>
+        @for (e of esperas(); track e.id) {
+          <div class="panel espera">
+            <div>
+              <strong>{{ e.funciones?.peliculas?.nombre }}</strong><br />
+              <span class="suave chico">
+                {{ e.funciones?.inicio | date: "EEEE d/M · HH:mm" }} h · {{ e.funciones?.salas?.nombre }}
+              </span>
+            </div>
+            @switch (e.estado) {
+              @case ('esperando') {
+                <span>Posición <strong>{{ e.posicion }}</strong></span>
+              }
+              @case ('avisado') {
+                @if (turnoVigente(e)) {
+                  <a class="btn btn-primario btn-chico" [routerLink]="['/comprar', e.funcion_id]">
+                    ¡Es tu turno! Comprá antes de las {{ venceTurno(e) | date: "HH:mm" }}
+                  </a>
+                } @else {
+                  <span class="suave">Tu turno venció</span>
+                }
+              }
+              @case ('compro') {
+                <span class="suave">Compraste desde la lista</span>
+              }
+              @case ('vencido') {
+                <span class="suave">Tu turno venció</span>
+              }
+            }
+            <button class="btn-chico" (click)="salirDeEspera(e.id)">
+              {{ e.estado === 'esperando' ? 'Salir' : 'Quitar' }}
+            </button>
+          </div>
+        }
+      </section>
+    }
+
     <!-- Historial de canjes -->
     <section>
       <h2>Historial de canjes</h2>
