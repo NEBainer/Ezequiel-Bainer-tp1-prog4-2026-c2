@@ -61,6 +61,20 @@ export class NotificacionesService {
       .eq('pelicula_id', peliculaId);
   }
 
+  // Prueba en el momento: suscribe este navegador y la Edge Function "notificar-prueba"
+  // le manda una push al mismo usuario
+  async enviarPrueba(usuarioId: string) {
+    const suscripcion = await this.suscribir(usuarioId);
+    if (suscripcion.error) {
+      return { error: suscripcion.error, enviadas: 0 };
+    }
+    const { data, error } = await this.supS.Sup.functions.invoke('notificar-prueba');
+    if (error) {
+      return { error: 'No se pudo enviar la notificación de prueba.', enviadas: 0 };
+    }
+    return { error: null, enviadas: (data?.enviadas as number) ?? 0 };
+  }
+
   // El envío se hace del lado del servidor: Edge Function "notificar-estreno" con web-push
   async avisarVentaAbierta(peliculaId: number) {
     const { data, error } = await this.supS.Sup.functions.invoke('notificar-estreno', {

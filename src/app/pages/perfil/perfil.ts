@@ -8,6 +8,7 @@ import { MiEspera, turnoVigente, venceTurno } from '../../interfaces/ListaEspera
 import { ComprasService, HORAS_LIMITE_CANCELACION, sePuedeCancelar } from '../../services/compras.service';
 import { Compra } from '../../interfaces/Compra';
 import { EntradaTicket } from '../../components/entrada-ticket/entrada-ticket';
+import { NotificacionesService } from '../../services/notificaciones.service';
 
 @Component({
   selector: 'app-perfil',
@@ -20,6 +21,7 @@ export class Perfil implements OnInit {
   private comprasS = inject(ComprasService);
   private supabaseS = inject(SupabaseService);
   private listaEsperaS = inject(ListaEsperaService);
+  private notificacionesS = inject(NotificacionesService);
 
   esperas = signal<MiEspera[]>([]);
   turnoVigente = turnoVigente;
@@ -48,6 +50,20 @@ export class Perfil implements OnInit {
       (c) => c.estado === 'cancelada' && c.funciones?.cancelada && new Date(c.funciones.inicio).getTime() > Date.now(),
     ),
   );
+
+  enviandoPrueba = signal(false);
+
+  // Botón de prueba: dispara una push al momento a este mismo usuario
+  async probarPush() {
+    const usuario = this.authS.usuarioActual();
+    if (!usuario) {
+      return;
+    }
+    this.enviandoPrueba.set(true);
+    const { error, enviadas } = await this.notificacionesS.enviarPrueba(usuario.id);
+    this.enviandoPrueba.set(false);
+    this.mensaje.set(error ?? (enviadas > 0 ? 'Notificación de prueba enviada.' : 'No hay suscripciones activas para enviar.'));
+  }
 
   async ngOnInit() {
     await this.cargar();

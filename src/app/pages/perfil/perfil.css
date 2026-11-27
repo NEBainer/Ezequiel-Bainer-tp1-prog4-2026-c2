@@ -82,3 +82,9 @@ dd {
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
+
+.acciones-encabezado {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
