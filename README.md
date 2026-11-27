@@ -12,8 +12,20 @@ Sistema web para un cine: venta de entradas con selección de butacas en tiempo 
 | Admin | admin@fotograma.com.ar | Fotograma2026 |
 | Empleado | empleado@fotograma.com.ar | Fotograma2026 |
 | Cliente (58 años) | cliente@fotograma.com.ar | Fotograma2026 |
+| Cliente | bruno@fotograma.com.ar | Fotograma2026 |
+| Cliente | carla@fotograma.com.ar | Fotograma2026 |
+| Rol configurable "Contador" (solo reportes) | contador@fotograma.com.ar | Fotograma2026 |
 
-También se puede comprar sin cuenta (compra anónima).
+En la pantalla de ingreso hay **accesos rápidos** para admin, empleado y cliente. También se puede comprar sin cuenta (compra anónima).
+
+**Notificación push de prueba:** en *Mi perfil*, el botón "Probar notificación push" suscribe el navegador y envía una notificación al momento al usuario logueado (Edge Function `notificar-prueba`). Requiere el sitio desplegado (el Service Worker no corre en `ng serve`).
+
+### Datos cargados para probar
+Además de la cartelera, las funciones de los próximos días y el candy, el script `supabase/09_datos_recuperatorio.sql` deja listos estos casos (se puede volver a ejecutar para renovar las fechas):
+- **Lista de espera:** la función de *Contraluz* a las 11:00 en la Sala 4, dentro de 2 días, está **agotada**. Clara (cliente) es la primera en la lista y Carla la segunda. Si Bruno cancela su compra desde su perfil, se liberan 2 butacas y Clara recibe la push con 15 minutos para comprar.
+- **Cancelación por el cine:** la función de *Pampa Salvaje* a las 11:00 en la Sala 4, dentro de 3 días, tiene compras de Clara (con candy), Bruno y Carla (pagó una parte con crédito). El admin la cancela desde Funciones y cada uno recibe el crédito y la opción de reubicarse.
+- **Propuestas:** hay dos pendientes (de Bruno y de Carla) para aceptar o rechazar. Clara no tiene ninguna pendiente y puede proponer en el momento.
+- **Roles:** el rol "Contador" solo habilita Reportes y está asignado a contador@fotograma.com.ar.
 
 ## Funcionalidades
 - **Cartelera:** las 3 películas más vendidas primero, buscador por nombre y filtro por uno o más géneros, puntuación promedio. Sección "Próximamente" con alerta por notificación push.
