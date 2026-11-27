@@ -2,3 +2,19 @@
   display: block;
   padding: 2.5rem 1rem 3rem;
 }
+
+.accesos {
+  border-top: 1px solid var(--borde);
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.accesos-botones {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.accesos-botones .btn {
+  flex: 1;
+}

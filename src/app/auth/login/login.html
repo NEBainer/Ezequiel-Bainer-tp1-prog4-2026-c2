@@ -27,5 +27,14 @@
   }
 
   <button type="submit" class="btn-primario">Ingresar</button>
+  <div class="accesos">
+    <p class="suave">Acceso rápido</p>
+    <div class="accesos-botones">
+      @for (a of accesosRapidos; track a.email) {
+        <button type="button" class="btn btn-chico" (click)="ingresarComo(a.email)">{{ a.rol }}</button>
+      }
+    </div>
+  </div>
+
   <p>¿No tenés cuenta? <a routerLink="/auth/registro">Registrate</a> y obtené un cupón en tu primera compra.</p>
 </form>

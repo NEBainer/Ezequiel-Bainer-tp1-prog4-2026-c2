@@ -24,6 +24,19 @@ export class Login {
     password: new FormControl('', Validators.required),
   });
 
+  // Usuarios de prueba (los mismos del README) para entrar con un clic en la corrección
+  accesosRapidos = [
+    { rol: 'Admin', email: 'admin@fotograma.com.ar' },
+    { rol: 'Empleado', email: 'empleado@fotograma.com.ar' },
+    { rol: 'Cliente', email: 'cliente@fotograma.com.ar' },
+  ];
+
+  // Carga los datos en el formulario con setValue y ingresa
+  ingresarComo(email: string) {
+    this.formulario.setValue({ email, password: 'Fotograma2026' });
+    this.accion();
+  }
+
   get email() {
     return this.formulario.get('email');
   }
